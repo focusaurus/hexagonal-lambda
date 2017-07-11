@@ -1,0 +1,6 @@
+.build
+.nyc_output
+coverage
+local
+node_modules
+*.tf.json
