@@ -5,7 +5,7 @@ This is an example application repository for implementing [hexagonal architectu
 ## How to Set Up for Development
 
 - Install prerequisites
-  - `zip`
+  - zip
   - node and npm
     - See `.nvmrc` file for correct node version
     - Using [https://github.com/creationix/nvm](nvm) recommended but optional
@@ -17,6 +17,11 @@ This is an example application repository for implementing [hexagonal architectu
 - Build lambdas: `./bin/build-lambda.sh code/*-lambda.js`
 - Run lint: `npm run lint`
 - Run tests: `npm test`
+  - Run a single test: `NODE_ENV=test tap code/foo-tap.js`
+  - Run a few tests: `NODE_ENV=test tap code/foo-tap.js code/bar-tap.js`
+  - debug a single test file: `NODE_ENV=test node --debug-brk --inspect code/foo-tap.js`
+- Run a lambda locally: `node code/foo-lambda.js`
+  - Edit the sample data at the bottom of the file to suite specific needs
 - Run code coverage: `npm run coverage`
 - Preview terraform (plan): `./bin/terraform.sh`
 - Provision for real (terraform apply): `./bin/terraform.sh apply`
@@ -31,7 +36,14 @@ This project follows the same [underlying principles](https://github.com/focusau
   - The handler function is exported as `exports.handler`
 - I use the `mintsauce` middleware npm package to allow me to concisely mix and match reusable middlewares across all my lambdas
   - The middleware pattern from express is proven effective, but it has drawbacks around implicit middleware interdependencies and run order
-- All lambda code is easy and fast to unit test locally, able to be executed locally, and able to be executed on AWS.
+  - Try not to over-rely on `call.local` shared state
+- All lambda code is easy to test and develop on
+  - Lambda tests are fully runnable offline
+  - The whole test suite is fast to run
+  - It's easy to run a single test file
+  - It's easy to run a small group of test files
+  - It's easy to run some or all tests under the devtools debugger
+  -and fast to unit test locally, able to be executed locally, and able to be executed on AWS.
 - Each lambda has a corresponding `-tap.js` file for the unit tests
 - Each lambda has a corresponding `-tf.js` that defines the terraform configuration for that lambda function, and a corresponding API Gateway method as needed
 
@@ -57,7 +69,7 @@ Any external service dependencies are represented with a clean function call bou
 
 For testing the glue code that interacts with the remote service, we mock HTTP responses with nock to make sure our adapter code handles all cases properly.
 
-We design our AWS event-driven architecture to make sure the scope/responsibility of any particular lambda function is small enough to fully test without a huge amount of backing service mocking ceremony.
+We design our AWS event-driven architecture to make sure the scope/responsibility of any particular lambda function is small enough to fully test without a huge amount of backing service mocking ceremony. Rule of thumb would be if you have to make 3 service calls start looking for a way to split into several lambdas by using kinesis, dynamodb streams, etc.
 
 ## Logging
 
@@ -73,15 +85,21 @@ I use **eslint** for static analysis. Very valuable.
 
 I use **prettier** for automatic code formatting. No configuration. Great wrapping of long lines.
 
-## First-time AWS setup
+I prefer **tap** for my test runner because the API doesn't require much nesting of functions, the matching API is memorable and effective, and code coverage tooling is integrated out of the box.
 
-Note since AWS S3 bucket names are globally unique, you'll need to change the name since I'm already using the ones below.
+## Style vs Substance
 
-- Install the AWS command line tools
-- Create an account, get your access keys as per the docs
-- Configure AWS auth as per the docs (I use env vars)
-- Set up the terraform prerequisites
-  - `aws s3 mb s3://hexagonal-lambda-terraform --region "${AWS_DEFAULT_REGION}"`
-  - `aws dynamodb create-table --table-name hexagonal-lambda-terraform --key-schema AttributeName=LockID,KeyType=HASH --attribute-definitions AttributeName=LockID,AttributeType=S --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1`
-  - `(cd terraform && terraform init)`
-- Run `./bin/terraform.sh` (that will do a terraform plan)
+I don't care so much about this particular set of npm dependencies, this particular testing stack, this code formatting style, etc. It's more about the substance:
+
+- We are confident the code is correct and robust
+  - Hitting a surprise bug after deployment is a rare event
+- We can simulate base/happy cases as well as edge/error cases in tests
+  - Otherwise there's no way to know what will happen that 1 time a year when that S3 HTTP GET fails
+- We can make changes effeciently and offline
+  - Rapid cycle of edit/test (near-zero delay)
+- We are protected against basic issues
+  - eslint config handles a lot of basic typos, etc
+  - near-100% code coverage means code was actually executed locally before being committed, pushed, or deployed
+- Developers can navigate the code easily
+  - Easy to find which file to edit
+  - Easy to edit all files necessary to make a typical change
