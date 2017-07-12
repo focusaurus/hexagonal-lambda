@@ -3,7 +3,6 @@
 /* eslint-disable no-template-curly-in-string */
 const config = require("./core/config");
 const path = require("path");
-const set = require("dot2val").set;
 const terraform = require("./core/terraform");
 
 const name = path.basename(__filename, "-tf.js");
@@ -21,12 +20,6 @@ terraform.merge(
     method: "GET"
   })
 );
-//
-// set(exports, `resource.aws_api_gateway_resource.bytes`, {
-//   rest_api_id: "${aws_api_gateway_rest_api.hexagonal-lambda.id}",
-//   parent_id: "${aws_api_gateway_rest_api.hexagonal-lambda.root_resource_id}",
-//   path_part: "bytes"
-// });
 
 if (require.main === module) {
   console.log(JSON.stringify(exports, null, 2));
