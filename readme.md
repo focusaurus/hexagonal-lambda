@@ -81,6 +81,17 @@ There is terraform configuration here to provision all the necessary AWS resourc
 
 ## Tooling
 
+For lambda builds at the moment I am using **webpack** and terraform for deployments. I haven't found a better way of managing depnedencies and getting small zip files. Webpack allows me to
+
+- Share 1 package.json file for all lambdas in the repo, which keeps things simple
+- Only bundle the production dependencies, no dev/test dependencies
+- Only bundle the specific dependencies of each individual lambda function. Because webpack walks the `require` dependency graph, each lambda gets only what it actually uses
+  - The get-hex.zip file is well under 1 MB, for example
+  - In theory the single-file bundling might even speed up the lambda cold startup time due to fewer filesystem reads, but that's just maybe a tiny side benefit
+- When I looked at serverless framework in Oct 2016 it was still pretty clunky and didn't seem to have a viable dependency management solution. That may have already been satisfactorily fixed or if not might be soon.
+- I like the comprehensiveness that terraform can provision almost every resource I need, both the "serverless" ones and most other random AWS stuff as well.
+- I think learning/using terraform is more broadly useful/valuable vs just knowing serverless.
+
 I use **eslint** for static analysis. Very valuable.
 
 I use **prettier** for automatic code formatting. No configuration. Great wrapping of long lines.
