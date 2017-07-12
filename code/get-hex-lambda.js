@@ -8,9 +8,9 @@ const console = lambdaUtils.console;
 
 exports.eventSchema = schemas.define({
   type: "object",
-  required: ["pathParameters"],
+  required: ["queryStringParameters"],
   properties: {
-    pathParameters: {
+    queryStringParameters: {
       type: "object",
       required: ["size"],
       properties: {
@@ -22,12 +22,12 @@ exports.eventSchema = schemas.define({
     }
   },
   example() {
-    return {pathParameters: {size: "32"}};
+    return {queryStringParameters: {size: "32"}};
   }
 });
 
 function getHex(call, res, next) {
-  const size = call.event.pathParameters.size;
+  const size = call.event.queryStringParameters.size;
   console.log(`Requesting ${size} bytes from httpbin`);
   httpbin.getBytes(size, (error, buffer) => {
     if (error) {

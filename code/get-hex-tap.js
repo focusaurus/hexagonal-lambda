@@ -33,9 +33,9 @@ tap.afterEach(done => {
 });
 
 const invalids = [
-  ["pathParameters.size", false],
-  ["pathParameters.size", "11111"], // too many digits
-  ["pathParameters.size", "!!!#^$*&*"]
+  ["queryStringParameters.size", false],
+  ["queryStringParameters.size", "11111"], // too many digits
+  ["queryStringParameters.size", "!!!#^$*&*"]
 ];
 
 invalids.forEach(pair => {
@@ -55,7 +55,7 @@ tap.test("handler should work in base case", test => {
   handler(event, {}, (error, res) => {
     tap.error(error);
     tap.same(res.statusCode, 200);
-    tap.ok(stubs.getBytes.calledWith(event.pathParameters.size));
+    tap.ok(stubs.getBytes.calledWith(event.queryStringParameters.size));
     const body = JSON.parse(res.body);
     tap.same(body, {hex: "7778797a"});
     test.end();

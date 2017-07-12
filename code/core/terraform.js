@@ -101,6 +101,7 @@ function endpoint(opts) {
   /* eslint-disable camelcase */
   const rest_api_id = `\${aws_api_gateway_rest_api.${opts.api}.id}`;
   const resource_id = `\${aws_api_gateway_resource.${opts.name}.id}`;
+  const methodPath = `\${aws_api_gateway_method.${opts.name}-${opts.method}.http_method}`;
   const obj = {};
   set(obj, `resource.aws_api_gateway_resource.${opts.name}`, {
     // eslint-disable-next-line no-template-curly-in-string
@@ -130,9 +131,8 @@ function endpoint(opts) {
   set(obj, `resource.aws_api_gateway_integration.${opts.name}-${opts.method}`, {
     rest_api_id,
     resource_id,
-    http_method: opts.method,
-    // always POST
-    integration_http_method: "POST",
+    http_method: methodPath,
+    integration_http_method: "POST", // always POST
     type: "AWS_PROXY",
     uri: `arn:aws:apigateway:\${var.region}:lambda:path/2015-03-31/functions/\${aws_lambda_function.${opts.name}.arn}/invocations`
   });

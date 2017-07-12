@@ -1,7 +1,11 @@
 variable "account" {}
 
+variable "httpbin_url" {
+  default = "https://httpbin.org"
+}
+
 variable "region" {
-  default = "us-east-1"
+  default = "us-west-2"
 }
 
 variable "build_dir" {
@@ -12,17 +16,26 @@ provider "aws" {
   region = "${var.region}"
 }
 
-resource "aws_s3_bucket" "hexagonal-lambda-terraform3" {
-  bucket = "hexagonal-lambda-terraform3" # sigh
+// resource "aws_s3_bucket" "hexagonal-lambda-terraform" {
+//   bucket = "hexagonal-lambda-terraform"
+//
+//   versioning {
+//     enabled = true
+//   }
+//
+//   lifecycle {
+//     prevent_destroy = true
+//   }
+// }
 
-  versioning {
-    enabled = true
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
+// terraform {
+//   backend "s3" {
+//     bucket         = "hexagonal-lambda-terraform"
+//     key            = "terraform.tfstate"
+//     encrypt        = true
+//     dynamodb_table = "hexagonal-lambda-terraform"
+//   }
+// }
 
 resource "aws_dynamodb_table" "hexagonal-lambda-terraform" {
   name           = "hexagonal-lambda-terraform"
@@ -35,16 +48,6 @@ resource "aws_dynamodb_table" "hexagonal-lambda-terraform" {
     type = "S"
   }
 }
-
-// terraform {
-//   backend "s3" {
-//     bucket         = "hexagonal-lambda-terraform3"
-//     key            = "terraform.tfstate"
-//     region         = "us-west-2"
-//     encrypt        = true
-//     dynamodb_table = "hexagonal-lambda-terraform"
-//   }
-// }
 
 resource "aws_api_gateway_rest_api" "hexagonal-lambda" {
   name        = "Hexagonal Lambda"
