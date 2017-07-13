@@ -26,10 +26,10 @@ tap.test("lambdaUtils.validateEvent invalid event", test => {
   const next = sinon.spy();
   middleware({event: {}}, res, next);
   test.ok(res.send.calledOnce);
-  const error = res.send.firstCall.args[0];
-  test.ok(error);
-  test.match(error.message, "required property 'count'");
-  test.same(error.statusCode, 400);
+  const result = res.send.firstCall.args[0];
+  test.ok(result);
+  test.match(result.body, "required property 'count'");
+  test.same(result.statusCode, 400);
   test.end();
 });
 

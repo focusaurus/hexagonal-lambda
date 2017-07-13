@@ -70,7 +70,10 @@ function validateEvent(schema) {
     // Validate
     const error = schema.check(call.event);
     if (error) {
-      res.send(httpError(400, error.message));
+      res.send({
+        statusCode: 400,
+        body: JSON.stringify({message: error.message})
+      });
       return;
     }
     next();

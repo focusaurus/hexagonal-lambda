@@ -2,6 +2,8 @@
 
 This is an example application repository for implementing [hexagonal architecture](http://alistair.cockburn.us/Hexagonal+architecture) as described by Alistair Cockburn (also called "ports and adapters") on to of Amazon Web Services Lambda.
 
+It is intended to be a reference/example project implementation. While small, it is hopefully realistic and reasonably comprehensive. It takes into account development tooling, testing, deployment, security, developer documentation, and API documentation.
+
 ## How to Set Up for Development
 
 - Install prerequisites
@@ -21,14 +23,24 @@ This is an example application repository for implementing [hexagonal architectu
   - Run a few tests: `NODE_ENV=test tap code/foo-tap.js code/bar-tap.js`
   - debug a single test file: `NODE_ENV=test node --debug-brk --inspect code/foo-tap.js`
 - Run a lambda locally: `node code/foo-lambda.js`
-  - Edit the sample data at the bottom of the file to suite specific needs
+  - Edit the sample event object at the bottom of the file to suite specific needs
 - Run code coverage: `npm run coverage`
 - Preview terraform (plan): `./bin/terraform.sh`
 - Provision for real (terraform apply): `./bin/terraform.sh apply`
+- Run smoke (integration/system) tests
+  - `export API_URL=https://XXXXXXXX.execute-api.REGION.amazonaws.com/STAGE` with the appropriate values for your deployment
+  - `npm run smoke`
 
 ## Filesystem Layout
 
 This project follows the same [underlying principles](https://github.com/focusaurus/express_code_structure#underlying-principles-and-motivations) I describe in my "Express Code Structure" sample project.
+
+**File Naming Conventions**
+
+- `*-tap.js` tap unit test files
+- `*-tf.js` terraform json configuration generator scripts
+- `*-lamba.js` AWS lambda handler modules
+
 
 ## Lambda Organization
 
@@ -39,11 +51,12 @@ This project follows the same [underlying principles](https://github.com/focusau
   - Try not to over-rely on `call.local` shared state
 - All lambda code is easy to test and develop on
   - Lambda tests are fully runnable offline
+  - Lambda handlers are fully runnable local talking to AWS/Internet services
   - The whole test suite is fast to run
   - It's easy to run a single test file
   - It's easy to run a small group of test files
   - It's easy to run some or all tests under the devtools debugger
-  -and fast to unit test locally, able to be executed locally, and able to be executed on AWS.
+  - It's easy to run a lambda handler under the devtools debugger
 - Each lambda has a corresponding `-tap.js` file for the unit tests
 - Each lambda has a corresponding `-tf.js` that defines the terraform configuration for that lambda function, and a corresponding API Gateway method as needed
 
@@ -59,7 +72,7 @@ For lambdas triggered by API Gateway, most errors are "soft errors" and should b
 
 ## Configuration
 
-Like external input, configuration data is considered external and thus we define the expected schema in JSON schema and validate it. The code takes configuration key/value string settings from environment variables (both for local development and when running in lambda), and validates the configuration is sufficient before using that data.
+Like external input, configuration data is considered external and thus we define the expected schema in JSON schema and validate it as early as possible and refuse to process invalid configuration. The code takes configuration key/value string settings from environment variables (both for local development and when running in lambda), and validates the configuration is sufficient before using that data.
 
 When tests are run (`NODE_ENV=test`) a realistic but neutered/harmless ("example.com" etc) test configuration is forceably set so the test environment is consistent.
 
@@ -79,6 +92,14 @@ I keep it very simple as I've found the following sufficient so far. Use `null-c
 
 There is terraform configuration here to provision all the necessary AWS resources. It works OK but it can be a bit boilerplatey and tedious. I don't use terraform modules because I simply don't buy their marketing pitch that modules are expressive enough and no "coding" is necessary. Except it is and the "helper functions" they give you for things like path processing are just not something I'm interested in learning only to find them inadequate, especially considering I've got a perfectly good programming language handy and spitting out a bunch of similar JSON files is bread and butter for JavaScript developers. Thus I handle common patterns for lamda and API Gateway terraform configs with `code/core/terraform.js` and spit out the necessary `terraform/*.tf.json` files as the first part of the `./bin/terraform.sh` wrapper script.
 
+Why not AWS CloudFormation? Mostly because terraform is multi-cloud and therefore more broadly valuable to know, and frankly because I heard at AWS re:Invent 2016 the community had mostly switched to terraform over cloudformation.
+
+## Smoke Tests
+
+My approach to end-to-end system testing I think is best described as "smoke testing" in that I run a small/minimal set of tests that ensure me the target environment is basically operational (not billowing out smoke). These smoke tests do not exhaustively test the application though.  I rely on my unit tests to thoroughly test the code's functionality. The smoke tests run quickly due to their very limited scope and are generally harmless and/or read-only operations.
+
+They can be run against different environments by setting the `API_URL` environment variable to the API Gateway URL including the path prefix corresponding to the deployment stage but no trailing slash.
+
 ## Tooling
 
 For lambda builds at the moment I am using **webpack** and terraform for deployments. I haven't found a better way of managing depnedencies and getting small zip files. Webpack allows me to
@@ -86,9 +107,9 @@ For lambda builds at the moment I am using **webpack** and terraform for deploym
 - Share 1 package.json file for all lambdas in the repo, which keeps things simple
 - Only bundle the production dependencies, no dev/test dependencies
 - Only bundle the specific dependencies of each individual lambda function. Because webpack walks the `require` dependency graph, each lambda gets only what it actually uses
-  - The get-hex.zip file is well under 1 MB, for example
+  - The `get-hex.zip` file is well under 1 MB, for example
   - In theory the single-file bundling might even speed up the lambda cold startup time due to fewer filesystem reads, but that's just maybe a tiny side benefit
-- When I looked at serverless framework in Oct 2016 it was still pretty clunky and didn't seem to have a viable dependency management solution. That may have already been satisfactorily fixed or if not might be soon.
+- When I looked at serverless framework in Oct 2016 it was still pretty clunky and didn't seem to have a viable dependency management solution. That may have already been satisfactorily fixed or if not might be soon. I plan to re-evaluate serverless as it matures and adopt if/when it becomes useful.
 - I like the comprehensiveness that terraform can provision almost every resource I need, both the "serverless" ones and most other random AWS stuff as well.
 - I think learning/using terraform is more broadly useful/valuable vs just knowing serverless.
 
