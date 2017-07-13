@@ -14,7 +14,7 @@ tap.test("config should error on invalid", test => {
   delete process.env.NODE_ENV;
   process.env.HTTPBIN_URL = "NOPE NOPE";
   const config = require("./config"); // eslint-disable-line global-require
-  tap.ok(config.error, "Should expose error");
+  test.ok(config.error, "Should expose error");
   test.end();
 });
 
@@ -23,6 +23,6 @@ tap.test("config should error on missing required", test => {
   delete process.env.NODE_ENV;
   delete process.env.HTTPBIN_URL;
   const config = require("./config"); // eslint-disable-line global-require
-  tap.ok(config.error, "Should expose error");
+  test.ok(config.error, "Should expose error");
   test.end();
 });
