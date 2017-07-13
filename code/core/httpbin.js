@@ -28,3 +28,38 @@ function getBytes(size, callback) {
   );
 }
 exports.getBytes = getBytes;
+
+function post(payload, callback) {
+  request(
+    {
+      url: `${config.HTTPBIN_URL}/post`,
+      method: "POST",
+      json: true,
+      body: payload
+    },
+    (error, res, body) => {
+      if (error) {
+        callback(error);
+        return;
+      }
+      if (res.statusCode !== 200) {
+        callback(
+          httpError(
+            res.statusCode,
+            `httpbin response error status ${res.statusCode}`
+          )
+        );
+        return;
+      }
+      let data;
+      try {
+        data = JSON.parse(body.data);
+      } catch (error2) {
+        callback(new Error(`Invalid JSON from httpbin. ${error2.message}`));
+        return;
+      }
+      callback(null, data);
+    }
+  );
+}
+exports.post = post;
