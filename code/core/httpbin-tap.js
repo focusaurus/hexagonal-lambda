@@ -8,6 +8,10 @@ function mockBytes() {
   return nock(config.HTTPBIN_URL).get(/^\/bytes/i);
 }
 
+function mockPost() {
+  return nock(config.HTTPBIN_URL).post("/post");
+}
+
 tap.test("httpbin.getBytes base case", test => {
   const scope = mockBytes().reply(200, Buffer.from("wxyz"));
   httpbin.getBytes(32, (error, bytes) => {
@@ -50,10 +54,6 @@ tap.test(`should handle low-level error`, {skip: false}, test => {
     test.end();
   });
 });
-
-function mockPost() {
-  return nock(config.HTTPBIN_URL).post("/post");
-}
 
 tap.test("httpbin.post base case", test => {
   const scope = mockPost().reply(200, {
