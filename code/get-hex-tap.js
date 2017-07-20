@@ -1,7 +1,7 @@
 "use strict";
 const {handler, eventSchema} = require("./get-hex-lambda");
-const dot2val = require("dot2val");
 const httpbin = require("./core/httpbin");
+const set = require("lodash.set");
 const sinon = require("sinon");
 const tap = require("tap");
 
@@ -11,7 +11,7 @@ let stubs;
 function mockEvent(path, value) {
   const event = eventSchema.example();
   if (path) {
-    dot2val.set(event, path, value);
+    set(event, path, value);
   }
   return event;
 }

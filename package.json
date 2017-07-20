@@ -35,7 +35,6 @@
   },
   "homepage": "https://github.com/focusaurus/hexagonal-lambda#readme",
   "devDependencies": {
-    "dot2val": "1.2.2",
     "eslint": "4.2.0",
     "eslint-config-airbnb-base": "11.2.0",
     "eslint-config-prettier": "2.3.0",
@@ -50,6 +49,8 @@
   },
   "dependencies": {
     "ajv": "5.2.2",
+    "lodash.get": "4.4.2",
+    "lodash.set": "4.3.2",
     "mintsauce": "0.1.1",
     "request": "2.81.0",
     "uppercase-keys": "1.1.1"

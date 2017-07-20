@@ -1,5 +1,6 @@
 "use strict";
-const {get, set} = require("dot2val");
+const get = require("lodash.get");
+const set = require("lodash.set");
 const path = require("path");
 
 function tableArn(name) {

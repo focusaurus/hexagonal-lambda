@@ -1,6 +1,6 @@
 "use strict";
 const {handler, eventSchema} = require("./post-up-lambda");
-const dot2val = require("dot2val");
+const set = require("lodash.set");
 const httpbin = require("./core/httpbin");
 const sinon = require("sinon");
 const tap = require("tap");
@@ -11,7 +11,7 @@ let stubs;
 function mockEvent(path, value) {
   const event = eventSchema.example();
   if (path) {
-    dot2val.set(event, path, value);
+    set(event, path, value);
   }
   return event;
 }
