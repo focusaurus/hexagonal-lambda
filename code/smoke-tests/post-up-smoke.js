@@ -13,9 +13,9 @@ tap.test("get-hex base case", test => {
       json: true
     },
     (error, res, body) => {
-      tap.error(error);
-      tap.match(res.statusCode, 200);
-      tap.same(body, {CAT: "cat", DOG: "dog"});
+      test.error(error);
+      test.match(res.statusCode, 200);
+      test.same(body, {CAT: "cat", DOG: "dog"});
       test.end();
     }
   );
@@ -29,9 +29,9 @@ tap.test("get-hex input validation", test => {
       body: "{]"
     },
     (error, res, body) => {
-      tap.error(error);
-      tap.match(res.statusCode, 400);
-      tap.match(body, "Invalid");
+      test.error(error);
+      test.match(res.statusCode, 400);
+      test.match(body, "Invalid");
       test.end();
     }
   );
