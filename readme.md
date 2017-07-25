@@ -25,8 +25,8 @@ It is intended to be a reference/example project implementation. While small, it
 - Run a lambda locally: `node code/foo-lambda.js`
   - Edit the sample event object at the bottom of the file to suite specific needs
 - Run code coverage: `npm run coverage`
-- Preview terraform (plan): `./bin/terraform.sh`
-- Provision for real (terraform apply): `./bin/terraform.sh apply`
+- Preview terraform: `(cd terraform && terraform plan)`
+- Provision for real: `(cd terraform && terraform plan)`
 - Run smoke (integration/system) tests
   - `export API_URL=https://XXXXXXXX.execute-api.REGION.amazonaws.com/STAGE` with the appropriate values for your deployment
   - `npm run smoke`
@@ -38,9 +38,7 @@ This project follows the same [underlying principles](https://github.com/focusau
 **File Naming Conventions**
 
 - `*-tap.js` tap unit test files
-- `*-tf.js` terraform json configuration generator scripts
 - `*-lamba.js` AWS lambda handler modules
-
 
 ## Lambda Organization
 
@@ -58,7 +56,7 @@ This project follows the same [underlying principles](https://github.com/focusau
   - It's easy to run some or all tests under the devtools debugger
   - It's easy to run a lambda handler under the devtools debugger
 - Each lambda has a corresponding `-tap.js` file for the unit tests
-- Each lambda has a corresponding `-tf.js` that defines the terraform configuration for that lambda function, and a corresponding API Gateway method as needed
+- Each lambda has a corresponding `terraform/*.tf` that defines the terraform configuration for that lambda function, and a corresponding API Gateway method as needed
 
 ## Input Validation
 
@@ -90,7 +88,7 @@ I keep it very simple as I've found the following sufficient so far. Use `null-c
 
 ## Provisioning with Terraform
 
-There is terraform configuration here to provision all the necessary AWS resources. It works OK but it can be a bit boilerplatey and tedious. I don't use terraform modules because I simply don't buy their marketing pitch that modules are expressive enough and no "coding" is necessary. Except it is and the "helper functions" they give you for things like path processing are just not something I'm interested in learning only to find them inadequate, especially considering I've got a perfectly good programming language handy and spitting out a bunch of similar JSON files is bread and butter for JavaScript developers. Thus I handle common patterns for lamda and API Gateway terraform configs with `code/core/terraform.js` and spit out the necessary `terraform/*.tf.json` files as the first part of the `./bin/terraform.sh` wrapper script.
+There is terraform configuration here to provision all the necessary AWS resources. It works OK but it can be a bit boilerplatey and tedious.
 
 Why not AWS CloudFormation? Mostly because terraform is multi-cloud and therefore more broadly valuable to know, and frankly because I heard at AWS re:Invent 2016 the community had mostly switched to terraform over cloudformation.
 

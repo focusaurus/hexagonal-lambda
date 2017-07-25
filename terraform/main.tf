@@ -58,3 +58,7 @@ resource "aws_api_gateway_deployment" "hexagonal-lambda-dev" {
   rest_api_id = "${aws_api_gateway_rest_api.hexagonal-lambda.id}"
   stage_name  = "dev"
 }
+
+output "api_url" {
+  value = "https://${aws_api_gateway_rest_api.hexagonal-lambda.id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_deployment.hexagonal-lambda-dev.stage_name}"
+}
