@@ -37,8 +37,9 @@ This project follows the same [underlying principles](https://github.com/focusau
 
 **File Naming Conventions**
 
-- `*-tap.js` tap unit test files
 - `*-lamba.js` AWS lambda handler modules
+- `*-tap.js` tap unit test files
+- `*-smoke.js` smoke test files
 
 ## Lambda Organization
 
