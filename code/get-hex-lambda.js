@@ -57,5 +57,5 @@ exports.handler = lambda;
 /* istanbul ignore if */
 if (require.main === module) {
   // exports.handler(exports.eventSchema.example(), {}, console.log);
-  exports.handler({queryStringParameters: {size: "no"}}, {}, console.log);
+  exports.handler({queryStringParameters: {size: "25"}}, {}, console.log);
 }
