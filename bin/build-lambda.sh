@@ -30,7 +30,9 @@ fi
 cd "$(dirname "$0")/.."
 PATH="$(npm bin):${PATH}"
 
+echo -n webpack…
 webpack
+echo ✓
 
 info_path=".build/build-info.txt"
 cat <<EOF >"${info_path}"

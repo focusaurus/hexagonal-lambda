@@ -15,8 +15,10 @@ variable timeout {
   default = 3
 }
 
+variable prefix {}
+
 resource aws_iam_role iam_role {
-  name = "${var.function_name}-assume-role-lambda"
+  name = "${var.prefix}-${var.function_name}-assume-role-lambda"
 
   assume_role_policy = <<EOF
 {
@@ -45,14 +47,18 @@ resource aws_iam_role_policy_attachment iam_role_policy_attachment {
   policy_arn = "${aws_iam_policy.iam_policy.arn}"
 }
 
+locals {
+  zip_path = "../../.build/${var.function_name}.zip"
+}
+
 resource aws_lambda_function lambda_function {
-  filename         = "../.build/${var.function_name}.zip"
-  function_name    = "${var.function_name}"
-  role             = "${aws_iam_role.iam_role.arn}"
+  filename         = "${local.zip_path}"
+  function_name    = "${var.prefix}-${var.function_name}"
   handler          = "${var.function_name}.handler"
-  source_code_hash = "${base64sha256(file("../.build/${var.function_name}.zip"))}"
-  runtime          = "nodejs6.10"
   memory_size      = "${var.memory_size}"
+  role             = "${aws_iam_role.iam_role.arn}"
+  runtime          = "nodejs6.10"
+  source_code_hash = "${base64sha256(file("${local.zip_path}"))}"
   timeout          = "${var.timeout}"
 
   environment = {
@@ -62,4 +68,8 @@ resource aws_lambda_function lambda_function {
 
 output arn {
   value = "${aws_lambda_function.lambda_function.arn}"
+}
+
+output function_name {
+  value = "${aws_lambda_function.lambda_function.function_name}"
 }

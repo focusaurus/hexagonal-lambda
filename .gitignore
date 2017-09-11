@@ -4,3 +4,4 @@ coverage
 local
 node_modules
 *.tf.json
+python
