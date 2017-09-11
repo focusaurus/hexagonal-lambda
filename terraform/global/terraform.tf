@@ -10,23 +10,24 @@ resource aws_s3_bucket hexagonal-lambda-terraform {
   }
 }
 
-resource aws_dynamodb_table hexagonal-lambda-terraform {
-  name           = "hexagonal-lambda-terraform"
-  read_capacity  = 1
-  write_capacity = 1
-  hash_key       = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-}
+#
+# resource aws_dynamodb_table hexagonal-lambda-global-terraform {
+#   name           = "hexagonal-lambda-global-terraform"
+#   read_capacity  = 1
+#   write_capacity = 1
+#   hash_key       = "LockID"
+#
+#   attribute {
+#     name = "LockID"
+#     type = "S"
+#   }
+# }
 
 terraform {
   backend s3 {
     bucket         = "hexagonal-lambda-terraform"
     key            = "global/terraform.tfstate"
     encrypt        = true
-    dynamodb_table = "hexagonal-lambda-terraform"
+    dynamodb_table = "hexagonal-lambda-global-terraform"
   }
 }

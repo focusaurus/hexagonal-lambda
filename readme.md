@@ -93,6 +93,18 @@ There is terraform configuration here to provision all the necessary AWS resourc
 
 Why not AWS CloudFormation? Mostly because terraform is multi-cloud and therefore more broadly valuable to know, and frankly because I heard at AWS re:Invent 2016 the community had mostly switched to terraform over cloudformation.
 
+### DynamoDB Initial Setup
+
+```sh
+for deploy in global dev demo;
+do
+  aws dynamodb create-table \
+    --table-name "hexagonal-lambda-${deploy}-terraform" \
+    --key-schema AttributeName=LockID,KeyType=HASH \
+    --attribute-definitions AttributeName=LockID,AttributeType=S \
+    --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+done
+```
 ## Smoke Tests
 
 My approach to end-to-end system testing I think is best described as "smoke testing" in that I run a small/minimal set of tests that ensure me the target environment is basically operational (not billowing out smoke). These smoke tests do not exhaustively test the application though.  I rely on my unit tests to thoroughly test the code's functionality. The smoke tests run quickly due to their very limited scope and are generally harmless and/or read-only operations.
