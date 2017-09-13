@@ -1,5 +1,6 @@
 variable function_name {}
 variable policy_json {}
+variable prefix {}
 
 variable env {
   default = {
@@ -14,12 +15,6 @@ variable memory_size {
 variable timeout {
   default = 3
 }
-
-variable version {
-  default = "$LATEST"
-}
-
-variable prefix {}
 
 resource aws_iam_role iam_role {
   name = "${var.prefix}-${var.function_name}-assume-role-lambda"
