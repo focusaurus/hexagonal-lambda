@@ -15,6 +15,10 @@ variable timeout {
   default = 3
 }
 
+variable version {
+  default = "$LATEST"
+}
+
 variable prefix {}
 
 resource aws_iam_role iam_role {
@@ -47,18 +51,14 @@ resource aws_iam_role_policy_attachment iam_role_policy_attachment {
   policy_arn = "${aws_iam_policy.iam_policy.arn}"
 }
 
-locals {
-  zip_path = "../../.build/${var.function_name}.zip"
-}
-
 resource aws_lambda_function lambda_function {
-  filename         = "${local.zip_path}"
+  filename         = "../../.build/${var.function_name}.zip"
   function_name    = "${var.prefix}-${var.function_name}"
   handler          = "${var.function_name}.handler"
   memory_size      = "${var.memory_size}"
   role             = "${aws_iam_role.iam_role.arn}"
   runtime          = "nodejs6.10"
-  source_code_hash = "${base64sha256(file("${local.zip_path}"))}"
+  source_code_hash = "${base64sha256(file("../../.build/${var.function_name}.zip"))}"
   timeout          = "${var.timeout}"
 
   environment = {

@@ -28,8 +28,9 @@ It is intended to be a reference/example project implementation. While small, it
 - Preview terraform: `(cd terraform && terraform plan)`
 - Provision for real: `(cd terraform && terraform plan)`
 - Run smoke (integration/system) tests
-  - `export API_URL=https://XXXXXXXX.execute-api.REGION.amazonaws.com/STAGE; npm run smoke` with the appropriate values for your deployment
-  - Or scripted: `API_URL=$(./bin/api-url.sh) npm run smoke`
+  - `export API_URL=$(cd terraform/dev && ave  terraform output api_url)`
+    - where "terraform/dev" is the desired deployment to test
+  - `npm run smoke` with the appropriate values for your deployment
 
 ## Filesystem Layout
 

@@ -1,15 +1,15 @@
 variable account {}
-
-variable authorizer_id {
-  default = ""
-}
-
 variable function_name {}
 variable lambda_arn {}
 variable parent_id {}
 variable path {}
+variable prefix {}
 variable region {}
 variable rest_api_id {}
+
+variable authorizer_id {
+  default = ""
+}
 
 variable authorization {
   default = "NONE"
@@ -33,7 +33,7 @@ resource aws_iam_policy iam_policy {
       ],
       "Effect": "Allow",
       "Resource": [
-        "arn:aws:logs:${var.region}:${var.account}:log-group:/aws/lambda/${var.function_name}:*"
+        "arn:aws:logs:${var.region}:${var.account}:log-group:/aws/lambda/${var.prefix}-${var.function_name}:*"
       ]
     }
   ],
@@ -43,7 +43,7 @@ EOF
 }
 
 resource aws_iam_role iam_role {
-  name = "${var.function_name}-assume-role-apig"
+  name = "${var.prefix}-${var.function_name}-assume-role-apig"
 
   assume_role_policy = <<EOF
 {
@@ -63,7 +63,7 @@ EOF
 }
 
 resource aws_iam_role_policy_attachment iam_role_policy_attachment {
-  role       = "${var.function_name}-assume-role-apig"
+  role       = "${aws_iam_role.iam_role.name}"
   policy_arn = "${aws_iam_policy.iam_policy.arn}"
 }
 
@@ -98,7 +98,7 @@ resource aws_api_gateway_integration api_gateway_integration {
 resource aws_lambda_permission lambda_pemission {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = "arn:aws:lambda:${var.region}:${var.account}:function:${var.function_name}"
+  function_name = "${var.lambda_arn}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${var.account}:${var.rest_api_id}/*/${var.http_method}/*"
 }

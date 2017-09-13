@@ -14,9 +14,9 @@ data aws_iam_policy_document post-up {
 
 module post-up-lambda {
   function_name = "post-up"
+  policy_json   = "${data.aws_iam_policy_document.post-up.json}"
   prefix        = "${var.prefix}"
   source        = "../modules/lambda"
-  policy_json   = "${data.aws_iam_policy_document.post-up.json}"
 
   env = {
     HTTPBIN_URL = "${var.httpbin_url}"
@@ -25,12 +25,13 @@ module post-up-lambda {
 
 module post-up-endpoint {
   account       = "${var.account}"
-  function_name = "${module.post-up-lambda.function_name}"
+  function_name = "post-up"
   http_method   = "POST"
   lambda_arn    = "${module.post-up-lambda.arn}"
-  parent_id     = "${data.terraform_remote_state.global.aws_api_gateway_root_resource_id}"
+  parent_id     = "${aws_api_gateway_rest_api.hexagonal-lambda.root_resource_id}"
   path          = "up"
+  prefix        = "${var.prefix}"
   region        = "${var.region}"
-  rest_api_id   = "${data.terraform_remote_state.global.aws_api_gateway_rest_api_id}"
+  rest_api_id   = "${aws_api_gateway_rest_api.hexagonal-lambda.id}"
   source        = "../modules/endpoint"
 }
