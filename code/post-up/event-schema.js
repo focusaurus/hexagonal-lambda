@@ -1,5 +1,5 @@
 "use strict";
-const schemas = require("../core/schemas");
+const schemas = require("../schemas");
 
 module.exports = schemas.define({
   type: "object",

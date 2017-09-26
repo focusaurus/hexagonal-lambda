@@ -1,7 +1,7 @@
 "use strict";
-const config = require("../core/config");
-const httpbin = require("../core/httpbin");
-const lambdaUtils = require("../core/lambda-utils");
+const config = require("../config");
+const httpbin = require("../httpbin");
+const lambdaUtils = require("../lambda-utils");
 
 const console = lambdaUtils.console;
 

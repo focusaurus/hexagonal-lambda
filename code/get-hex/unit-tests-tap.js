@@ -1,7 +1,7 @@
 "use strict";
 const {handler} = require("./lambda");
 const eventSchema = require("./event-schema");
-const httpbin = require("../core/httpbin");
+const httpbin = require("../httpbin");
 const set = require("lodash.set");
 const sinon = require("sinon");
 const tap = require("tap");
