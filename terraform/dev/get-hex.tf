@@ -7,7 +7,7 @@ data aws_iam_policy_document iam_policy_document {
     ]
 
     resources = [
-      "arn:aws:logs:${var.region}:${var.account}:log-group:/aws/lambda/get-hex:*",
+      "arn:aws:logs:${var.region}:${var.account}:log-group:/aws/lambda/${var.prefix}-get-hex:*",
     ]
   }
 }
