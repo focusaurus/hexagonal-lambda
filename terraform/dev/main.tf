@@ -2,16 +2,6 @@ provider "aws" {
   region = "${var.region}"
 }
 
-# data terraform_remote_state global {
-#   backend = "s3"
-#
-#   config {
-#     bucket = "hexagonal-lambda-terraform"
-#     key    = "global/terraform.tfstate"
-#     region = "${var.region}"
-#   }
-# }
-
 resource "aws_api_gateway_rest_api" "hexagonal-lambda" {
   name        = "Hexagonal Lambda ${var.deploy}"
   description = "HTTP/JSON API endpoints for Hexagonal Lambda"

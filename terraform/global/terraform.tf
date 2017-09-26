@@ -10,24 +10,22 @@ resource aws_s3_bucket hexagonal-lambda-terraform {
   }
 }
 
-#
-# resource aws_dynamodb_table hexagonal-lambda-global-terraform {
-#   name           = "hexagonal-lambda-global-terraform"
-#   read_capacity  = 1
-#   write_capacity = 1
-#   hash_key       = "LockID"
-#
-#   attribute {
-#     name = "LockID"
-#     type = "S"
-#   }
-# }
+# Here's the command to create this table initially.
+# I found getting terraform to both use this table for state locking AND
+# create it didn't want to work
+/*
+aws dynamodb create-table \
+  --table-name hl-global-terraform \
+  --key-schema AttributeName=LockID,KeyType=HASH  \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+*/
 
 terraform {
   backend s3 {
     bucket         = "hexagonal-lambda-terraform"
     key            = "global/terraform.tfstate"
     encrypt        = true
-    dynamodb_table = "hexagonal-lambda-global-terraform"
+    dynamodb_table = "hl-global-terraform"
   }
 }
