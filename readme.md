@@ -16,17 +16,19 @@ It is intended to be a reference/example project implementation. While small, it
 
 ## How to…
 
-- Build lambdas: `./bin/build-lambda.sh code/*-lambda.js`
+- Build lambdas: `npm run build`
 - Run lint: `npm run lint`
 - Run tests: `npm test`
-  - Run a single test: `NODE_ENV=test tap code/foo-tap.js`
-  - Run a few tests: `NODE_ENV=test tap code/foo-tap.js code/bar-tap.js`
-  - debug a single test file: `NODE_ENV=test node --debug-brk --inspect code/foo-tap.js`
-- Run a lambda locally: `node code/foo-lambda.js`
-  - Edit the sample event object at the bottom of the file to suite specific needs
+  - Run a single test file: `NODE_ENV=test tap code/get-hex/unit-tests-tap.js`
+  - Run some tests in a  file: `NODE_ENV=test tap --grep=example code/get-hex/unit-tests-tap.js`
+    - This will only run tests whose description includes "example"
+  - Run a few tests: `NODE_ENV=test tap code/get-hex/unit-tests-tap.js code/post-up/unit-tests-tap.js`
+  - debug a single test file: `NODE_ENV=test node --debug-brk --inspect code/get-hex/unit-tests-tap.js`
+- Run a lambda locally: `node code/get-hex/run.js`
+  - Edit the sample event object in the code as needed before calling the lambda handler to simulate a specific case of interest
 - Run code coverage: `npm run coverage`
-- Preview terraform: `(cd terraform && terraform plan)`
-- Provision for real: `(cd terraform && terraform plan)`
+- Preview terraform: `(cd terraform/dev && terraform plan)`
+- Provision for real: `(cd terraform/dev && terraform apply)`
 - Run smoke (integration/system) tests
   - `export API_URL=$(cd terraform/dev && terraform output api_url)`
     - where "terraform/dev" is the desired deployment to test
@@ -38,14 +40,16 @@ This project follows the same [underlying principles](https://github.com/focusau
 
 **File Naming Conventions**
 
-- `*-lamba.js` AWS lambda handler modules
+- `lamba.js` AWS lambda handler modules
 - `*-tap.js` tap unit test files
-- `*-smoke.js` smoke test files
+- `smoke-tests.js` smoke test files
 
 ## Lambda Organization
 
-- Each lambda handler goes in a file ending in `-lambda.js`
-  - The handler function is exported as `exports.handler`
+- Each lambda handler goes in its own directory under `code/name-of-lambda`
+  - This directory contains
+  - The lambda code itself goes in `lambda.js`
+    - The handler function is exported as `exports.handler`
 - I use the `mintsauce` middleware npm package to allow me to concisely mix and match reusable middlewares across all my lambdas
   - The middleware pattern from express is proven effective, but it has drawbacks around implicit middleware interdependencies and run order
   - Try not to over-rely on `call.local` shared state
@@ -100,7 +104,7 @@ Why not AWS CloudFormation? Mostly because terraform is multi-cloud and therefor
 for deploy in global dev demo;
 do
   aws dynamodb create-table \
-    --table-name "hexagonal-lambda-${deploy}-terraform" \
+    --table-name "hl-${deploy}-terraform" \
     --key-schema AttributeName=LockID,KeyType=HASH \
     --attribute-definitions AttributeName=LockID,AttributeType=S \
     --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
@@ -130,6 +134,26 @@ I use **eslint** for static analysis. Very valuable.
 I use **prettier** for automatic code formatting. No configuration. Great wrapping of long lines.
 
 I prefer **tap** for my test runner because the API doesn't require much nesting of functions, the matching API is memorable and effective, and code coverage tooling is integrated out of the box.
+
+I use [aws-vault](https://github.com/99designs/aws-vault) to securely store AWS credentials. I have a macOS keychain defined for this purpose. I have the following shell helpers to make this less inconvenient:
+
+```sh
+AWS_PROFILE=focusaurus
+ave () {
+  if [[ -z "${AWS_PROFILE}" ]]
+  then
+    echo "Set AWS_PROFILE env var first" >&2
+    return 1
+  fi
+  aws-vault exec "${AWS_PROFILE}" -- "$@"
+}
+```
+
+Thus when I need credentials for an `aws` command or terraform, etc, I run it like so:
+
+`ave aws dynamodb list-tables`
+
+This exposes the AWS credentials to that one command only via environment variables. aws-vault also handles MFA/STS properly.
 
 ## Style vs Substance
 
