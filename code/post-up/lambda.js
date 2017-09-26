@@ -1,24 +1,10 @@
 "use strict";
-const config = require("./core/config");
-const httpbin = require("./core/httpbin");
-const lambdaUtils = require("./core/lambda-utils");
-const schemas = require("./core/schemas");
+const config = require("../core/config");
+const httpbin = require("../core/httpbin");
+const lambdaUtils = require("../core/lambda-utils");
 const uppercaseKeys = require("uppercase-keys");
 
 const console = lambdaUtils.console;
-
-exports.eventSchema = schemas.define({
-  type: "object",
-  required: ["body"],
-  properties: {
-    body: {
-      type: "object"
-    }
-  },
-  example() {
-    return {body: JSON.stringify({foo: "FOO", bar: "BAR"})};
-  }
-});
 
 function postUp(call, res, next) {
   console.log(`Posting up to httpbin`);
@@ -39,7 +25,7 @@ const lambda = require("mintsauce")();
 lambda.use([
   lambdaUtils.logStart,
   lambdaUtils.validateConfig(config),
-  lambdaUtils.validateEvent(exports.eventSchema),
+  lambdaUtils.validateEvent(require("./event-schema")),
   postUp,
   lambdaUtils.sendBody,
   lambdaUtils.errorHandler

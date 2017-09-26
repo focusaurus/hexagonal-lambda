@@ -1,6 +1,7 @@
 "use strict";
-const {handler, eventSchema} = require("./get-hex-lambda");
-const httpbin = require("./core/httpbin");
+const {handler} = require("./lambda");
+const eventSchema = require("./event-schema");
+const httpbin = require("../core/httpbin");
 const set = require("lodash.set");
 const sinon = require("sinon");
 const tap = require("tap");

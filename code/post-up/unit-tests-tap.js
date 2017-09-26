@@ -1,7 +1,8 @@
 "use strict";
-const {handler, eventSchema} = require("./post-up-lambda");
+const {handler} = require("./lambda");
+const eventSchema = require("./event-schema");
+const httpbin = require("../core/httpbin");
 const set = require("lodash.set");
-const httpbin = require("./core/httpbin");
 const sinon = require("sinon");
 const tap = require("tap");
 
