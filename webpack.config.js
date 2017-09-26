@@ -12,6 +12,12 @@ module.exports = {
   target: "node"
 };
 
-glob.sync(`${__dirname}/code/**/*-lambda.js`).forEach(lambdaPath => {
-  module.exports.entry[path.basename(lambdaPath, "-lambda.js")] = lambdaPath;
+glob.sync(`${__dirname}/code/**/lambda.js`).forEach(lambdaPath => {
+  const name = path.basename(path.dirname(lambdaPath));
+  module.exports.entry[name] = lambdaPath;
 });
+
+// Allow `node webpack.config.js` to troubleshoot
+if (require.main === module) {
+  console.log(JSON.stringify(module.exports, null, 2));
+}

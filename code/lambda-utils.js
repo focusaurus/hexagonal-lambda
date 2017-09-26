@@ -59,7 +59,6 @@ function validateEvent(schema) {
     // If we have a JSON string body (API Gateway endpoint), parse it first
     if (typeof call.event.body === "string") {
       try {
-        // eslint-disable-next-line no-param-reassign
         call.event.body = JSON.parse(call.event.body);
       } catch (badJson) {
         const message = `Invalid JSON in request body. ${badJson.message}`;

@@ -13,7 +13,6 @@ function getHex(call, res, next) {
       next(error);
       return;
     }
-    // eslint-disable-next-line no-param-reassign
     call.body = {hex: buffer.toString("hex")};
     next();
   });

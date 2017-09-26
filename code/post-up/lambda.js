@@ -13,16 +13,15 @@ function postUp(call, res, next) {
       next(error);
       return;
     }
-    // eslint-disable-next-line no-param-reassign
     call.body = uppercaseKeys(body);
     next();
   });
 }
 
 /* eslint-disable global-require */
-const lambda = require("mintsauce")();
+const handler = require("mintsauce")();
 
-lambda.use([
+handler.use([
   lambdaUtils.logStart,
   lambdaUtils.validateConfig(config),
   lambdaUtils.validateEvent(require("./event-schema")),
@@ -31,9 +30,4 @@ lambda.use([
   lambdaUtils.errorHandler
 ]);
 
-exports.handler = lambda;
-
-/* istanbul ignore if */
-if (require.main === module) {
-  exports.handler(exports.eventSchema.example(), {}, console.log);
-}
+exports.handler = handler;
