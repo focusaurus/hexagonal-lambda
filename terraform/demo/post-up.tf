@@ -7,7 +7,7 @@ data aws_iam_policy_document post-up {
     ]
 
     resources = [
-      "arn:aws:logs:${var.region}:${var.account}:log-group:/aws/lambda/post-up:*",
+      "arn:aws:logs:${var.region}:${var.account}:log-group:/aws/lambda/${var.prefix}-post-up:*",
     ]
   }
 }
