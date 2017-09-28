@@ -1,4 +1,5 @@
 "use strict";
+/* istanbul ignore next */
 const console =
   process.env.NODE_ENV === "test" ? require("null-console") : global.console;
 

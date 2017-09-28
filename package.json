@@ -1,11 +1,13 @@
 {
   "name": "hexagonal-lambda",
   "version": "1.0.0",
-  "description": "Sample AWS Lambda and API Gateway application using hexagonal architecture",
+  "description":
+    "Sample AWS Lambda and API Gateway application using hexagonal architecture",
   "main": "code",
   "scripts": {
     "build": "echo webpack… && webpack && echo ✓ && node ./bin/zip-lambdas.js",
-    "coverage": "NODE_ENV=test tap --jobs-auto --coverage-report=html 'code/**/*-tap.js'",
+    "coverage":
+      "NODE_ENV=test tap --jobs-auto --coverage-report=html 'code/**/*-tap.js'",
     "lint": "eslint code bin",
     "smoke": "tap code/**/smoke-tests.js",
     "test": "NODE_ENV=test tap --jobs-auto 'code/**/*-tap.js'",
@@ -26,9 +28,13 @@
     "adapters"
   ],
   "nyc": {
-    "exclude": [
-      "**/*-tap.js"
-    ]
+    "exclude": ["**/*-tap.js"],
+    "watermarks": {
+      "branches": [90, 100],
+      "functions": [80, 100],
+      "lines": [80, 100],
+      "statements": [80, 100]
+    }
   },
   "author": "Peter Lyons <pete@peterlyons.com> (http://peterlyons.com/)",
   "license": "MIT",
