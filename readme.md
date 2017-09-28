@@ -33,6 +33,9 @@ It is intended to be a reference/example project implementation. While small, it
   - `export API_URL=$(cd terraform/dev && terraform output api_url)`
     - where "terraform/dev" is the desired deployment to test
   - `npm run smoke` with the appropriate values for your deployment
+- Trigger an API Gateway deployment: `node bin/deploy-apig.js dev`
+  - Substitute `demo` for `dev` to target that deployment
+  - Note our terraform-triggered deployments currently have an ordering issue where they fire before other APIG changes are done, so manually deploying is sometimes required.
 
 ## Filesystem Layout
 
