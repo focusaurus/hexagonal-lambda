@@ -36,16 +36,20 @@ It is intended to be a reference/example project implementation. While small, it
 - Trigger an API Gateway deployment: `ave node bin/deploy-apig.js dev`
   - Substitute `demo` for `dev` to target that deployment
   - Note our terraform-triggered deployments currently have an ordering issue where they fire before other APIG changes are done, so manually deploying is sometimes required.
+- Build OpenAPI JSON for documentation: `ave node ./bin/build-openapi.js`
+  - Spits out JSON to stdout. Copy/paste to a swagger UI if you want a pretty site.
+  - `ave ./bin/build-openapi.js demo` if you want to set the demo deployment as the base URL
 
 ## Filesystem Layout
 
-This project follows the same [underlying principles](https://github.com/focusaurus/express_code_structure#underlying-principles-and-motivations) I describe in my "Express Code Structure" sample project.
+This project follows the same [underlying principles](https://github.com/focusaurus/express_code_structure#underlying-principles-and-motivations) I describe in my "Express Code Structure" sample project. Terraform doesn't play well with this as it requires grouping all `.tf` files in the same directory, so those are in a separate directory.
 
 **File Naming Conventions**
 
 - `lamba.js` AWS lambda handler modules
 - `*-tap.js` tap unit test files
 - `smoke-tests.js` smoke test files
+- `openapi.js` Open API documentation as an object
 
 ## Lambda Organization
 
@@ -82,6 +86,12 @@ For lambdas triggered by API Gateway, most errors are "soft errors" and should b
 Like external input, configuration data is considered external and thus we define the expected schema in JSON schema and validate it as early as possible and refuse to process invalid configuration. The code takes configuration key/value string settings from environment variables (both for local development and when running in lambda), and validates the configuration is sufficient before using that data.
 
 When tests are run (`NODE_ENV=test`) a realistic but neutered/harmless ("example.com" etc) test configuration is forceably set so the test environment is consistent.
+
+## API Documentation
+
+The docs are defined as a javascript object matching the OpenAPI v2 spec. This gets printed to JSON. It's tiny. Just read it as JSON but if you must you can paste it into a [Swagger UI Editor](https://editor.swagger.io) if you like.
+
+The basic structure and shared things are defined in `bin/build-openapi.js` and then each endpoint`s `openapi.js` file merges in the openapi data for it's own endpoint path.
 
 ## Hexagonal Architecture: External Services
 

@@ -21,6 +21,13 @@ function define(jsonSchema) {
         };
       }
       return null;
+    },
+    openapi() {
+      const api = Object.assign({}, jsonSchema);
+      if (typeof jsonSchema.example === "function") {
+        api.example = jsonSchema.example();
+      }
+      return api;
     }
   });
 }
