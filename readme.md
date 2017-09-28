@@ -27,13 +27,13 @@ It is intended to be a reference/example project implementation. While small, it
 - Run a lambda locally: `node code/get-hex/run.js`
   - Edit the sample event object in the code as needed before calling the lambda handler to simulate a specific case of interest
 - Run code coverage: `npm run coverage`
-- Preview terraform: `(cd terraform/dev && terraform plan)`
-- Provision for real: `(cd terraform/dev && terraform apply)`
+- Preview terraform: `(cd terraform/dev && ave terraform plan)`
+- Provision for real: `(cd terraform/dev && ave terraform apply)`
 - Run smoke (integration/system) tests
-  - `export API_URL=$(cd terraform/dev && terraform output api_url)`
+  - `export API_URL=$(cd terraform/dev && ave terraform output api_url)`
     - where "terraform/dev" is the desired deployment to test
   - `npm run smoke` with the appropriate values for your deployment
-- Trigger an API Gateway deployment: `node bin/deploy-apig.js dev`
+- Trigger an API Gateway deployment: `ave node bin/deploy-apig.js dev`
   - Substitute `demo` for `dev` to target that deployment
   - Note our terraform-triggered deployments currently have an ordering issue where they fire before other APIG changes are done, so manually deploying is sometimes required.
 
