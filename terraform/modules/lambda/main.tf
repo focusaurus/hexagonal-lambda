@@ -37,8 +37,8 @@ EOF
 }
 
 resource aws_iam_policy iam_policy {
-  path   = "/"
   policy = "${var.policy_json}"
+  name   = "${var.prefix}-${var.function_name}-execution-policy"
 }
 
 resource aws_iam_role_policy_attachment iam_role_policy_attachment {

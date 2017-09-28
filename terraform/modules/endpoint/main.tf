@@ -20,7 +20,7 @@ variable http_method {
 }
 
 resource aws_iam_policy iam_policy {
-  path = "/"
+  name = "${var.prefix}-${var.function_name}-endpoint-policy"
 
   policy = <<EOF
 {
@@ -43,7 +43,7 @@ EOF
 }
 
 resource aws_iam_role iam_role {
-  name = "${var.prefix}-${var.function_name}-assume-role-apig"
+  name = "${var.prefix}-${var.function_name}-assume-role-endpoint"
 
   assume_role_policy = <<EOF
 {

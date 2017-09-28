@@ -7,7 +7,7 @@ const uppercaseKeys = require("uppercase-keys");
 const console = lambdaUtils.console;
 
 function postUp(call, res, next) {
-  console.log(`Posting up to httpbin`);
+  console.log("Posting up to httpbin");
   httpbin.post(call.event.body, (error, body) => {
     if (error) {
       next(error);

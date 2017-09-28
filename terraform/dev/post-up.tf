@@ -35,3 +35,9 @@ module post-up-endpoint {
   rest_api_id   = "${aws_api_gateway_rest_api.hexagonal-lambda.id}"
   source        = "../modules/endpoint"
 }
+
+module post-up-cors {
+  resource_id = "${module.post-up-endpoint.resource_id}"
+  rest_api_id = "${aws_api_gateway_rest_api.hexagonal-lambda.id}"
+  source      = "../modules/cors"
+}
