@@ -1,5 +1,3 @@
-variable account {}
-
 variable deploy {
   default = "dev"
 }

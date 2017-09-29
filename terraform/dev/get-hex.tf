@@ -7,7 +7,7 @@ data aws_iam_policy_document iam_policy_document {
     ]
 
     resources = [
-      "arn:aws:logs:${var.region}:${var.account}:log-group:/aws/lambda/${var.prefix}-get-hex:*",
+      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.prefix}-get-hex:*",
     ]
   }
 }
@@ -24,7 +24,6 @@ module get-hex-lambda {
 }
 
 module get-hex-endpoint {
-  account       = "${var.account}"
   function_name = "get-hex"
   lambda_arn    = "${module.get-hex-lambda.arn}"
   parent_id     = "${aws_api_gateway_rest_api.hexagonal-lambda.root_resource_id}"
