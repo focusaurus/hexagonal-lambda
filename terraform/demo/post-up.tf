@@ -7,7 +7,7 @@ data aws_iam_policy_document post-up {
     ]
 
     resources = [
-      "arn:aws:logs:${var.region}:${var.account}:log-group:/aws/lambda/${var.prefix}-post-up:*",
+      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.prefix}-post-up:*",
     ]
   }
 }
@@ -24,7 +24,6 @@ module post-up-lambda {
 }
 
 module post-up-endpoint {
-  account       = "${var.account}"
   function_name = "post-up"
   http_method   = "POST"
   lambda_arn    = "${module.post-up-lambda.arn}"
