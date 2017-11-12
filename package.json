@@ -2,7 +2,6 @@
   "name": "hexagonal-lambda",
   "version": "1.1.0",
   "description": "Sample AWS Lambda and API Gateway application using hexagonal architecture",
-  "main": "code",
   "scripts": {
     "build": "echo webpack… && webpack && echo ✓ && node ./bin/zip-lambdas.js",
     "coverage": "NODE_ENV=test tap --jobs-auto --coverage-report=html 'code/**/*-tap.js'",

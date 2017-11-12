@@ -19,7 +19,8 @@ module get-hex-lambda {
   source        = "../modules/lambda"
 
   env = {
-    HTTPBIN_URL = "${var.httpbin_url}"
+    HL_HTTPBIN_URL = "${var.hl_httpbin_url}"
+    HL_SECRET1     = "${var.hl_secret1}"
   }
 }
 
