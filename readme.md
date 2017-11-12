@@ -11,11 +11,33 @@ It is intended to be a reference/example project implementation. While small, it
   - node and npm
     - See `.nvmrc` file for correct node version
     - Using [https://github.com/creationix/nvm](nvm) recommended but optional
-  - Optional but handy: awscli
-  - `brew install awscli`
+  - pass: `brew install pass`
+  - Optional but handy: awscli:  `brew install awscli`
     - **OR** `virtualenv python && ./python/bin/pip install awscli`
 - Clone the git repo if you haven't already and `cd` into the root directory
 - Run `npm install && npm run lint && npm test`
+- Set up your `local/env.sh` based on the template below
+
+```
+export AWS_DEFAULT_REGION='us-west-2'
+export PASS_ENV='hexagonal-lambda-dev'
+export HL_DEPLOY='dev'
+export HL_HTTPBIN_URL='https://httpbin.org'
+export TF_VAR_httpbin_url="${HL_HTTPBIN_URL}"
+```
+
+- To use that for terminal development we do `source ./local/env.sh`;
+- Set up your secrets.
+  - There's some docs missing here on initially setting up a PGP key if you've never had one before and initializing your password store/repo. I'm currently pondering different alternatives for this so bear with me while I figure that out.
+
+```
+cat <<EOF
+export AWS_ACCESS_KEY_ID='AAAAAAAAAAAAAAAAAAAA'
+export AWS_SECRET_ACCESS_KEY='example-secret-access-key'
+export HL_SECRET1='example-secret-1'
+export TF_VAR_hl_secret1="${HL_SECRET1}"
+EOF | pass -m insert hexagonal-lambda-dev
+```
 
 ## How to…
 
@@ -86,11 +108,27 @@ The `code/core/schemas.js` module provides some helper functions to make JSON sc
 
 For lambdas triggered by API Gateway, most errors are "soft errors" and should be done via `callback(null, res);` where `res.statusCode` is the appropriate HTTP 400/500 value. I only pass an error as the first callback argument for programmer/deployment errors that will require developer/admin attention to fix. Examples would be invalid lambda environment variables or IAM errors accessing AWS resources. But an external service failing, invalid end user input, anything that might resolve itself with time should be considered "success" from the lambda callback perspective.
 
-## Configuration
+## Configuration and Secrets
 
 Like external input, configuration data is considered external and thus we define the expected schema in JSON schema and validate it as early as possible and refuse to process invalid configuration. The code takes configuration key/value string settings from environment variables (both for local development and when running in lambda), and validates the configuration is sufficient before using that data.
 
 When tests are run (`NODE_ENV=test`) a realistic but neutered/harmless ("example.com" etc) test configuration is forceably set so the test environment is consistent.
+
+Then we use the following `run-pass` shell function to run privileged commands as needed. The idea here is to ONLY have the secret environment variables set when running the commands that need them such as `aws` or `terraform` and to NOT have them set for normal terminal development and especially not when doing risky stull like `npm install`.
+
+```sh
+run-pass () {
+  if [[ -z "${PASS_ENV}" ]]
+  then
+    echo "Set PASS_ENV env var first" >&2
+    return 1
+  fi
+  # shellcheck disable=SC2145
+  echo "$(pass "${PASS_ENV}"); $@" | bash
+}
+```
+
+Thus you'll see `run-pass` used in the above commands as needed.
 
 ## API Documentation
 
@@ -140,7 +178,7 @@ For lambda builds at the moment I am using **webpack** and terraform for deploym
 
 - Share 1 package.json file for all lambdas in the repo, which keeps things simple
 - Only bundle the production dependencies, no dev/test dependencies
-- Only bundle the specific dependencies of each individual lambda function. Because webpack walks the `require` dependency graph, each lambda gets only what it actually uses
+- Only bundle the specific dependencies of each individual lambda function. Because webpack walks the `require` dependency graph, each lambda gets only what it actually uses. (This is only to package granularity, no tree shaking to get even more precise than that)
   - The `get-hex.zip` file is well under 1 MB, for example
   - In theory the single-file bundling might even speed up the lambda cold startup time due to fewer filesystem reads, but that's just maybe a tiny side benefit
 - When I looked at serverless framework in Oct 2016 it was still pretty clunky and didn't seem to have a viable dependency management solution. That may have already been satisfactorily fixed or if not might be soon. I plan to re-evaluate serverless as it matures and adopt if/when it becomes useful.
@@ -152,20 +190,6 @@ I use **eslint** for static analysis. Very valuable.
 I use **prettier** for automatic code formatting. No configuration. Great wrapping of long lines.
 
 I prefer **tap** for my test runner because the API doesn't require much nesting of functions, the matching API is memorable and effective, and code coverage tooling is integrated out of the box.
-
-TODO: docs on pass, pgp, etc
-
-```sh
-run-pass () {
-  if [[ -z "${PASS_ENV}" ]]
-  then
-    echo "Set PASS_ENV env var first" >&2
-    return 1
-  fi
-  # shellcheck disable=SC2145
-  echo "$(pass "${PASS_ENV}"); $@" | bash
-}
-```
 
 Thus when I need credentials for an `aws` command or terraform, etc, I run it like so:
 
