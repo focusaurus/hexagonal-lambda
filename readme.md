@@ -7,19 +7,19 @@ It is intended to be a reference/example project implementation. While small, it
 ## How to Set Up for Development
 
 - Install prerequisites
-  - zip
   - node and npm
     - See `.nvmrc` file for correct node version
     - Using [https://github.com/creationix/nvm](nvm) recommended but optional
+  - zip
   - pass: `brew install pass`
-  - Optional but handy: awscli:  `brew install awscli`
+  - AWS CLI:  `brew install awscli`
     - **OR** `virtualenv python && ./python/bin/pip install awscli`
 - Clone the git repo if you haven't already and `cd` into the root directory
 - Run `npm install && npm run lint && npm test`
 - Set up your `local/env.sh` based on the template below
 
 ```
-export AWS_DEFAULT_REGION='us-west-2'
+export AWS_DEFAULT_REGION='us-example-1'
 export PASS_ENV='hexagonal-lambda-dev'
 export HL_DEPLOY='dev'
 export HL_HTTPBIN_URL='https://httpbin.org'
@@ -27,8 +27,9 @@ export TF_VAR_httpbin_url="${HL_HTTPBIN_URL}"
 ```
 
 - To use that for terminal development we do `source ./local/env.sh`;
-- Set up your secrets.
+- Set up pgp and a private key for working with `pass`
   - There's some docs missing here on initially setting up a PGP key if you've never had one before and initializing your password store/repo. I'm currently pondering different alternatives for this so bear with me while I figure that out.
+- Set up your secrets.
 
 ```
 cat <<EOF | pass -m insert hexagonal-lambda-dev
