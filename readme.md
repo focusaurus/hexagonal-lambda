@@ -31,12 +31,24 @@ export TF_VAR_httpbin_url="${HL_HTTPBIN_URL}"
   - There's some docs missing here on initially setting up a PGP key if you've never had one before and initializing your password store/repo. I'm currently pondering different alternatives for this so bear with me while I figure that out.
 
 ```
-cat <<EOF
-export AWS_ACCESS_KEY_ID='AAAAAAAAAAAAAAAAAAAA'
+cat <<EOF | pass -m insert hexagonal-lambda-dev
+export AWS_DEFAULT_REGION='us-example-1'
+export AWS_PROFILE='example'
+
+export AWS_ACCESS_KEY_ID='EXAMPLE'
 export AWS_SECRET_ACCESS_KEY='example-secret-access-key'
+export sts=$(aws sts get-session-token --duration-seconds 900 --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text)
+
+export AWS_ACCESS_KEY_ID=$(echo "${sts}" | awk '{print $1}')
+export AWS_SECRET_ACCESS_KEY=$(echo "${sts}" | awk '{print $2}')
+export AWS_SESSION_TOKEN=$(echo "${sts}" | awk '{print $3}')
+
+export HL_AWS_ACCOUNT='1111111111'
 export HL_SECRET1='example-secret-1'
+
+export TF_VAR_aws_account="${HL_AWS_ACCOUNT}"
 export TF_VAR_hl_secret1="${HL_SECRET1}"
-EOF | pass -m insert hexagonal-lambda-dev
+EOF
 ```
 
 ## How to…
