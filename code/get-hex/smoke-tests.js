@@ -2,7 +2,7 @@
 const request = require("request");
 const tap = require("tap");
 
-const url = process.env.API_URL;
+const url = process.env.HL_API_URL;
 
 tap.test("get-hex base case", test => {
   request(

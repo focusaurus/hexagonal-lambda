@@ -1,6 +1,6 @@
 # Hexagonal Lambda
 
-This is an example application repository for implementing [hexagonal architecture](http://alistair.cockburn.us/Hexagonal+architecture) as described by Alistair Cockburn (also called "ports and adapters") on to of Amazon Web Services Lambda.
+This is an example application repository for implementing [hexagonal architecture](http://alistair.cockburn.us/Hexagonal+architecture) as described by Alistair Cockburn (also called "ports and adapters") on top of Amazon Web Services Lambda.
 
 It is intended to be a reference/example project implementation. While small, it is hopefully realistic and reasonably comprehensive. It takes into account development tooling, testing, deployment, security, developer documentation, and API documentation.
 
@@ -11,6 +11,9 @@ It is intended to be a reference/example project implementation. While small, it
   - node and npm
     - See `.nvmrc` file for correct node version
     - Using [https://github.com/creationix/nvm](nvm) recommended but optional
+  - Optional but handy: awscli
+  - `brew install awscli`
+    - **OR** `virtualenv python && ./python/bin/pip install awscli`
 - Clone the git repo if you haven't already and `cd` into the root directory
 - Run `npm install && npm run lint && npm test`
 
@@ -22,23 +25,25 @@ It is intended to be a reference/example project implementation. While small, it
   - Run a single test file: `NODE_ENV=test tap code/get-hex/unit-tests-tap.js`
   - Run some tests in a  file: `NODE_ENV=test tap --grep=example code/get-hex/unit-tests-tap.js`
     - This will only run tests whose description includes "example"
-  - Run a few tests: `NODE_ENV=test tap code/get-hex/unit-tests-tap.js code/post-up/unit-tests-tap.js`
-  - debug a single test file: `NODE_ENV=test node --debug-brk --inspect code/get-hex/unit-tests-tap.js`
+  - Run a few test files: `NODE_ENV=test tap code/get-hex/unit-tests-tap.js code/post-up/unit-tests-tap.js`
+  - debug a single test file: `NODE_ENV=test node --inspect-brk --inspect code/get-hex/unit-tests-tap.js`
+    - Or since debugging in node v6.10 which is what AWS lambda supports at the moment is buggy, you can debug in newer node:
+    - `NODE_ENV=test nvm exec v8.9.0 node --inspect --inspect-brk code/get-hex/unit-tests-tap.js`
 - Run a lambda locally: `node code/get-hex/run.js`
   - Edit the sample event object in the code as needed before calling the lambda handler to simulate a specific case of interest
 - Run code coverage: `npm run coverage`
-- Preview terraform: `(cd terraform/dev && ave terraform plan)`
-- Provision for real: `(cd terraform/dev && ave terraform apply)`
+- Preview terraform: `(cd terraform/dev && run-pass terraform plan)`
+- Provision for real: `(cd terraform/dev && run-pass terraform apply)`
 - Run smoke (integration/system) tests
-  - `export API_URL=$(cd terraform/dev && ave terraform output api_url)`
+  - `export HL_API_URL=$(cd terraform/dev && run-pass terraform output api_url)`
     - where "terraform/dev" is the desired deployment to test
   - `npm run smoke` with the appropriate values for your deployment
-- Trigger an API Gateway deployment: `ave node bin/deploy-apig.js dev`
+- Trigger an API Gateway deployment: `run-pass npm run deploy-apig dev`
   - Substitute `demo` for `dev` to target that deployment
   - Note our terraform-triggered deployments currently have an ordering issue where they fire before other APIG changes are done, so manually deploying is sometimes required.
-- Build OpenAPI JSON for documentation: `ave node ./bin/build-openapi.js`
+- Build OpenAPI JSON for documentation: `run-pass npm run openapi`
   - Spits out JSON to stdout. Copy/paste to a swagger UI if you want a pretty site.
-  - `ave ./bin/build-openapi.js demo` if you want to set the demo deployment as the base URL
+  - `run-pass npm run openapi demo` if you want to set the demo deployment as the base URL
 
 ## Filesystem Layout
 
@@ -91,7 +96,7 @@ When tests are run (`NODE_ENV=test`) a realistic but neutered/harmless ("example
 
 The docs are defined as a javascript object matching the OpenAPI v2 spec. This gets printed to JSON. It's tiny. Just read it as JSON but if you must you can paste it into a [Swagger UI Editor](https://editor.swagger.io) if you like.
 
-The basic structure and shared things are defined in `bin/build-openapi.js` and then each endpoint`s `openapi.js` file merges in the openapi data for it's own endpoint path.
+The basic structure and shared things are defined in `bin/build-openapi.js` and then each endpoint's `openapi.js` file merges in the openapi data for it's own endpoint path.
 
 ## Hexagonal Architecture: External Services
 
@@ -148,23 +153,23 @@ I use **prettier** for automatic code formatting. No configuration. Great wrappi
 
 I prefer **tap** for my test runner because the API doesn't require much nesting of functions, the matching API is memorable and effective, and code coverage tooling is integrated out of the box.
 
-I use [aws-vault](https://github.com/99designs/aws-vault) to securely store AWS credentials. I have a macOS keychain defined for this purpose. I have the following shell helpers to make this less inconvenient:
+TODO: docs on pass, pgp, etc
 
 ```sh
-AWS_PROFILE=focusaurus
-ave () {
-  if [[ -z "${AWS_PROFILE}" ]]
+run-pass () {
+  if [[ -z "${PASS_ENV}" ]]
   then
-    echo "Set AWS_PROFILE env var first" >&2
+    echo "Set PASS_ENV env var first" >&2
     return 1
   fi
-  aws-vault exec "${AWS_PROFILE}" -- "$@"
+  # shellcheck disable=SC2145
+  echo "$(pass "${PASS_ENV}"); $@" | bash
 }
 ```
 
 Thus when I need credentials for an `aws` command or terraform, etc, I run it like so:
 
-`ave aws dynamodb list-tables`
+`run-pass aws dynamodb list-tables`
 
 This exposes the AWS credentials to that one command only via environment variables. aws-vault also handles MFA/STS properly.
 

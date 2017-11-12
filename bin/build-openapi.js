@@ -53,8 +53,8 @@ const standardResponses = {
 };
 
 // Add standard responses to every endpoint
-Object.keys(openApi.paths).forEach(path => {
-  const endpoint = openApi.paths[path];
+Object.keys(openApi.paths).forEach(apiPath => {
+  const endpoint = openApi.paths[apiPath];
   if (endpoint.get) {
     merge(endpoint.get.responses, standardResponses);
   }

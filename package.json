@@ -11,6 +11,7 @@
     "lint": "eslint code bin",
     "smoke": "tap code/**/smoke-tests.js",
     "test": "NODE_ENV=test tap --jobs-auto 'code/**/*-tap.js'",
+    "openapi": "node ./bin/build-openapi.js",
     "deploy-apig": "node ./bin/deploy-apig.js"
   },
   "repository": {

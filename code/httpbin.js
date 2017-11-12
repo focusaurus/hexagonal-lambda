@@ -6,7 +6,7 @@ const request = require("request");
 function getBytes(size, callback) {
   request(
     {
-      url: `${config.HTTPBIN_URL}/bytes/${encodeURIComponent(size)}`,
+      url: `${config.HL_HTTPBIN_URL}/bytes/${encodeURIComponent(size)}`,
       encoding: null
     },
     (error, res, body) => {
@@ -32,7 +32,7 @@ exports.getBytes = getBytes;
 function post(payload, callback) {
   request(
     {
-      url: `${config.HTTPBIN_URL}/post`,
+      url: `${config.HL_HTTPBIN_URL}/post`,
       method: "POST",
       json: true,
       body: payload

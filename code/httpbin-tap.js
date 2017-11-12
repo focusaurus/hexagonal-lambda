@@ -5,11 +5,11 @@ const nock = require("nock");
 const tap = require("tap");
 
 function mockBytes() {
-  return nock(config.HTTPBIN_URL).get(/^\/bytes/i);
+  return nock(config.HL_HTTPBIN_URL).get(/^\/bytes/i);
 }
 
 function mockPost() {
-  return nock(config.HTTPBIN_URL).post("/post");
+  return nock(config.HL_HTTPBIN_URL).post("/post");
 }
 
 tap.test("httpbin.getBytes base case", test => {

@@ -2,7 +2,7 @@ variable deploy {
   default = "dev"
 }
 
-variable httpbin_url {
+variable hl_httpbin_url {
   default = "https://httpbin.org"
 }
 
@@ -13,3 +13,5 @@ variable prefix {
 variable region {
   default = "us-west-2"
 }
+
+variable hl_secret1 {}

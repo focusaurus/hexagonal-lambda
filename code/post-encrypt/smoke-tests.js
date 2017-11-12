@@ -2,9 +2,9 @@
 const request = require("request");
 const tap = require("tap");
 
-const url = `${process.env.HL_API_URL}/up`;
+const url = `${process.env.HL_API_URL}/encrypt`;
 
-tap.test("post-up base case", test => {
+tap.test("post-encrypt base case", test => {
   request(
     {
       url,
@@ -15,13 +15,14 @@ tap.test("post-up base case", test => {
     (error, res, body) => {
       test.error(error);
       test.match(res.statusCode, 200);
-      test.same(body, {CAT: "cat", DOG: "dog"});
+      test.ok(body.encrypted);
+      test.same(typeof body.encrypted, "string");
       test.end();
     }
   );
 });
 
-tap.test("post-up input validation", test => {
+tap.test("post-encrypt input validation", test => {
   request(
     {
       url,
@@ -37,7 +38,7 @@ tap.test("post-up input validation", test => {
   );
 });
 
-tap.test("post-up CORS preflight should have right headers", test => {
+tap.test("post-encrypt CORS preflight should have right headers", test => {
   request(
     {
       url,
