@@ -4,7 +4,7 @@ This is an example application repository for implementing [hexagonal architectu
 
 It is intended to be a reference/example project implementation. While small, it is hopefully realistic and reasonably comprehensive. It takes into account development tooling, testing, deployment, security, developer documentation, and API documentation.
 
-## How to Set Up for Development
+## Setting up for development the first time
 
 - Install prerequisites
   - node and npm
@@ -16,7 +16,7 @@ It is intended to be a reference/example project implementation. While small, it
     - **OR** `virtualenv python && ./python/bin/pip install awscli`
 - Clone the git repo if you haven't already and `cd` into the root directory
 - Run `npm install && npm run lint && npm test`
-- Set up your `local/env.sh` based on the template below
+- Set up your `local/env.sh` based on the template below. More details on configuration further down in this document.
 
 ```
 export AWS_DEFAULT_REGION='us-example-1'
@@ -25,34 +25,14 @@ export HL_DEPLOY='dev'
 export HL_HTTPBIN_URL='https://httpbin.org'
 export TF_VAR_httpbin_url="${HL_HTTPBIN_URL}"
 ```
-
 - To use that for terminal development we do `source ./local/env.sh`;
+
 - Set up pgp and a private key for working with `pass`
-  - There's some docs missing here on initially setting up a PGP key if you've never had one before and initializing your password store/repo. I'm currently pondering different alternatives for this so bear with me while I figure that out.
-- Set up your secrets.
+  - There's some docs missing here on initially setting up a PGP key if you've never had one before and initializing your password store/repo. I'm currently pondering different alternatives for this so bear with me while I figure that out. Start with `gpg --full-generate-key`.
+- Set up the following shell alias (run in project root directory):
+  - `alias run-pass="${PWD}/bin/run-pass.sh"`
 
-```
-cat <<EOF | pass -m insert hexagonal-lambda-dev
-export AWS_DEFAULT_REGION='us-example-1'
-export AWS_PROFILE='example'
-
-export AWS_ACCESS_KEY_ID='EXAMPLE'
-export AWS_SECRET_ACCESS_KEY='example-secret-access-key'
-export sts=$(aws sts get-session-token --duration-seconds 900 --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text)
-
-export AWS_ACCESS_KEY_ID=$(echo "${sts}" | awk '{print $1}')
-export AWS_SECRET_ACCESS_KEY=$(echo "${sts}" | awk '{print $2}')
-export AWS_SESSION_TOKEN=$(echo "${sts}" | awk '{print $3}')
-
-export HL_AWS_ACCOUNT='1111111111'
-export HL_SECRET1='example-secret-1'
-
-export TF_VAR_aws_account="${HL_AWS_ACCOUNT}"
-export TF_VAR_hl_secret1="${HL_SECRET1}"
-EOF
-```
-
-## How to…
+## How to do typical development
 
 - Build lambdas: `npm run build`
 - Run lint: `npm run lint`
@@ -79,7 +59,10 @@ EOF
 - Build OpenAPI JSON for documentation: `run-pass npm run openapi`
   - Spits out JSON to stdout. Copy/paste to a swagger UI if you want a pretty site.
   - `run-pass npm run openapi demo` if you want to set the demo deployment as the base URL
-
+- Update secrets
+  - for dev: `(cd secrets/dev && PASSWORD_STORE_DIR=. pass edit secrets.sh)`
+  - for demo same put replace dev with demo
+- Import
 ## Filesystem Layout
 
 This project follows the same [underlying principles](https://github.com/focusaurus/express_code_structure#underlying-principles-and-motivations) I describe in my "Express Code Structure" sample project. Terraform doesn't play well with this as it requires grouping all `.tf` files in the same directory, so those are in a separate directory.
@@ -121,27 +104,40 @@ The `code/core/schemas.js` module provides some helper functions to make JSON sc
 
 For lambdas triggered by API Gateway, most errors are "soft errors" and should be done via `callback(null, res);` where `res.statusCode` is the appropriate HTTP 400/500 value. I only pass an error as the first callback argument for programmer/deployment errors that will require developer/admin attention to fix. Examples would be invalid lambda environment variables or IAM errors accessing AWS resources. But an external service failing, invalid end user input, anything that might resolve itself with time should be considered "success" from the lambda callback perspective.
 
-## Configuration and Secrets
+## Configuration
+
+Non-secret configuration can be set as environment variables prefixed with `HL_` to distinguish them from the other variables present in your environment. Use the `local/env.sh` file to configure them into your shell. This file is excluded from git to allow each developer the ability to set distinct personal settings if desired.
 
 Like external input, configuration data is considered external and thus we define the expected schema in JSON schema and validate it as early as possible and refuse to process invalid configuration. The code takes configuration key/value string settings from environment variables (both for local development and when running in lambda), and validates the configuration is sufficient before using that data.
 
 When tests are run (`NODE_ENV=test`) a realistic but neutered/harmless ("example.com" etc) test configuration is forceably set so the test environment is consistent.
 
-Then we use the following `run-pass` shell function to run privileged commands as needed. The idea here is to ONLY have the secret environment variables set when running the commands that need them such as `aws` or `terraform` and to NOT have them set for normal terminal development and especially not when doing risky stull like `npm install`.
+## Credentials and Secrets
 
-```sh
-run-pass () {
-  if [[ -z "${PASS_ENV}" ]]
-  then
-    echo "Set PASS_ENV env var first" >&2
-    return 1
-  fi
-  # shellcheck disable=SC2145
-  echo "$(pass "${PASS_ENV}"); $@" | bash
-}
+Developers will be working with a set of AWS credentials when interacting with AWS APIs. These are security sensitive and must remain confidential and thus there's a fairly byzantine system described here about how we try to secure them. We generally don't want them available to be stolen by shoulder surfing or unauthorized access to your laptop or stolen by malicious install scripts during `npm install`. Thus the are encrypted at rest using the [pass](https://www.passwordstore.org/) password storage system. This essentially makes a database of secrets encrypted via [OpenPGP](https://en.wikipedia.org/wiki/Pretty_Good_Privacy#OpenPGP) and associated tools such as gnupg, gpg-agent, etc.
+
+When running commands interacting with AWS such as `aws` or `terraform`, we'll use `./bin/run-pass.sh` in combination with gpg-agent to decrypt your permanent AWS credentials, which are then used with the AWS session token service to generate a set of temporary credentials, which we then expose to the subcommand actually doing the work as environment variables in a single short-lived subprocess.
+
+Initial setup of secrets was done basically as follows:
+
+```
+cat <<EOF | pass -m insert hexagonal-lambda-dev
+export AWS_ACCESS_KEY_ID='EXAMPLE'
+export AWS_SECRET_ACCESS_KEY='example-secret-access-key'
+export AWS_MFA_SERIAL='arn:aws:iam::1111111111:mfa/example-username'
+export AWS_PROFILE='example'
+
+export HL_AWS_ACCOUNT='1111111111'
+export HL_SECRET1='example-secret-1'
+
+export TF_VAR_aws_account="${HL_AWS_ACCOUNT}"
+export TF_VAR_hl_secret1="${HL_SECRET1}"
+EOF
 ```
 
-Thus you'll see `run-pass` used in the above commands as needed.
+Once you have a snippet of bash script stored in your password store, you can use the `run-pass` shell alias described above to to expose temporary credentials plus the application's secrets to subcommands.
+
+**Debugging run-pass.sh** can be enabled by `export RUN_PASS_DEBUG=yes` in your shell. Disable with `unset RUN_PASS_DEBUG`.
 
 ## API Documentation
 
