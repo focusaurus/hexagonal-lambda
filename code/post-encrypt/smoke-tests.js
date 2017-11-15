@@ -1,4 +1,5 @@
 "use strict";
+const cipher = require("./cipher");
 const request = require("request");
 const tap = require("tap");
 
@@ -17,6 +18,8 @@ tap.test("post-encrypt base case", test => {
       test.match(res.statusCode, 200);
       test.ok(body.encrypted);
       test.same(typeof body.encrypted, "string");
+      const payload = JSON.parse(cipher.decrypt(body.encrypted));
+      test.same(payload, {cat: "cat", dog: "dog"});
       test.end();
     }
   );
