@@ -22,7 +22,7 @@ function define(jsonSchema) {
       }
       return null;
     },
-    openapi() {
+    openAPI() {
       const api = Object.assign({}, jsonSchema);
       if (typeof jsonSchema.example === "function") {
         api.example = jsonSchema.example();

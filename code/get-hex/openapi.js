@@ -24,7 +24,7 @@ module.exports = {
         responses: {
           "200": {
             description: "JSON object with hex property",
-            schema: bodySchema.openapi()
+            schema: bodySchema.openAPI()
           }
         }
       }

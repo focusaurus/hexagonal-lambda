@@ -21,7 +21,7 @@ module.exports = {
         responses: {
           "200": {
             description: "JSON object with uppercase property names",
-            schema: bodySchema.openapi()
+            schema: bodySchema.openAPI()
           }
         }
       }
