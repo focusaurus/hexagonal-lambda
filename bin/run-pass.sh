@@ -79,7 +79,6 @@ check_permanent_credentials() {
 main() {
   debug "$0 starting with pid $$"
   check_pass_is_installed
-  debug "pass is installed"
   check_pass_env_is_set
   debug "PASS_ENV is: ${PASS_ENV}"
 
