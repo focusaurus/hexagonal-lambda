@@ -61,9 +61,13 @@ credentials_are_stale() {
 }
 
 check_permanent_credentials() {
-  if [[ ! "${AWS_ACCESS_KEY_ID}" =~ "^AK" ]]; then
-    bail "AWS_ACCESS_KEY_ID should begin with AK"
-  fi
+  case "${AWS_ACCESS_KEY_ID}" in
+    AK*) ;;
+
+    *)
+      bail "AWS_ACCESS_KEY_ID should begin with AK"
+      ;;
+  esac
   if [[ -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
     bail "AWS_SECRET_ACCESS_KEY not set in permanent credentials"
   fi
@@ -91,7 +95,6 @@ main() {
   eval ${temp_creds_snippet}
 
   if credentials_are_stale; then
-    debug "temporary credentials are absent or stale"
     # read in the permanent credentials so we can generate fresh temp creds
     eval "$(
       pass "${PASS_ENV}"
@@ -101,6 +104,9 @@ main() {
     echo -n "MFA code: "
     read -n 6 token_code
     echo
+    # this interferes with the get-session-token call
+    # shellcheck disable=SC2034
+    AWS_SESSION_TOKEN=''
     debug "getting a fresh session token from AWS"
     # this spits them out as whitespace delimited
     sts=$(aws sts get-session-token \
