@@ -5,11 +5,15 @@ const lambdaUtils = require("../lambda-utils");
 
 const console = lambdaUtils.console;
 
+function encrypt(clear) {
+  const cipher = crypto.createCipher("aes192", config.HL_SECRET1);
+  return cipher.update(clear, "utf8", "base64") + cipher.final("base64");
+}
+
 function postEncrypt(call, res, next) {
   console.log("Encrypting payload");
-  const cipher = crypto.createCipher("aes192", process.env.HL_SECRET1);
-  cipher.update(JSON.stringify(call.event.body));
-  call.body = {encrypted: cipher.final("base64")};
+  const encrypted = encrypt(JSON.stringify(call.event.body));
+  call.body = {encrypted};
   next();
 }
 

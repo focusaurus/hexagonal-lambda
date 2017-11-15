@@ -1,5 +1,7 @@
 "use strict";
 const {handler} = require("./lambda");
+const config = require("../config");
+const crypto = require("crypto");
 const eventSchema = require("./event-schema");
 const set = require("lodash.set");
 const tap = require("tap");
@@ -10,6 +12,11 @@ function mockEvent(path, value) {
     set(event, path, value);
   }
   return event;
+}
+
+function decrypt(encrypted) {
+  const decipher = crypto.createDecipher("aes192", config.HL_SECRET1);
+  return decipher.update(encrypted, "base64", "utf8") + decipher.final("utf8");
 }
 
 const invalids = [
@@ -38,6 +45,9 @@ tap.test("handler should work in base case", test => {
     const body = JSON.parse(res.body);
     test.ok(body.encrypted);
     test.same(typeof body.encrypted, "string");
+    const payloadJson = decrypt(body.encrypted);
+    const payload = JSON.parse(payloadJson);
+    test.match({foo: "FOO", bar: "BAR"}, payload);
     test.end();
   });
 });
