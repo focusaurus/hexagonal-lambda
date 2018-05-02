@@ -55,25 +55,26 @@
   },
   "homepage": "https://github.com/focusaurus/hexagonal-lambda#readme",
   "devDependencies": {
-    "eslint": "4.2.0",
-    "eslint-config-airbnb-base": "11.2.0",
-    "eslint-config-prettier": "2.3.0",
-    "eslint-plugin-import": "2.7.0",
+    "eslint": "4.19.1",
+    "eslint-config-airbnb-base": "12.1.0",
+    "eslint-config-prettier": "2.9.0",
+    "eslint-plugin-import": "2.11.0",
     "glob": "7.1.2",
-    "lodash.merge": "4.6.0",
-    "nock": "9.0.13",
+    "lodash.merge": "4.6.1",
+    "nock": "9.2.5",
     "null-console": "1.0.1",
-    "sinon": "2.3.7",
-    "tap": "10.7.0",
+    "sinon": "5.0.3",
+    "tap": "11.1.4",
     "touch": "3.1.0",
-    "webpack": "3.1.0"
+    "webpack": "4.6.0"
   },
   "dependencies": {
-    "ajv": "5.2.2",
+    "ajv": "6.4.0",
     "lodash.get": "4.4.2",
     "lodash.set": "4.3.2",
     "mintsauce": "0.1.1",
-    "request": "2.81.0",
+    "npm-check-updates": "^2.14.2",
+    "request": "2.85.0",
     "uppercase-keys": "1.1.1"
   }
 }
