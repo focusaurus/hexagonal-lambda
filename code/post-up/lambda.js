@@ -4,7 +4,7 @@ const httpbin = require("../httpbin");
 const lambdaUtils = require("../lambda-utils");
 const uppercaseKeys = require("uppercase-keys");
 
-const console = lambdaUtils.console;
+const {console} = lambdaUtils;
 
 function postUp(call, res, next) {
   console.log("Posting up to httpbin");

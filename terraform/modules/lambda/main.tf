@@ -52,7 +52,7 @@ resource aws_lambda_function lambda_function {
   handler          = "${var.function_name}.handler"
   memory_size      = "${var.memory_size}"
   role             = "${aws_iam_role.iam_role.arn}"
-  runtime          = "nodejs6.10"
+  runtime          = "nodejs8.10"
   source_code_hash = "${base64sha256(file("../../.build/${var.function_name}.zip"))}"
   timeout          = "${var.timeout}"
 

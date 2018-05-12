@@ -3,10 +3,10 @@ const config = require("../config");
 const httpbin = require("../httpbin");
 const lambdaUtils = require("../lambda-utils");
 
-const console = lambdaUtils.console;
+const {console} = lambdaUtils;
 
 function getHex(call, res, next) {
-  const size = call.event.queryStringParameters.size;
+  const {size} = call.event.queryStringParameters;
   console.log(`Requesting ${size} bytes from httpbin`);
   httpbin.getBytes(size, (error, buffer) => {
     if (error) {

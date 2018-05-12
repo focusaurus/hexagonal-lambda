@@ -3,7 +3,7 @@ const cipher = require("./cipher");
 const config = require("../config");
 const lambdaUtils = require("../lambda-utils");
 
-const console = lambdaUtils.console;
+const {console} = lambdaUtils;
 
 function postEncrypt(call, res, next) {
   console.log("Encrypting payload");

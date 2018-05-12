@@ -18,7 +18,7 @@ function mockEvent(path, value) {
 }
 
 tap.beforeEach(done => {
-  sandbox = sinon.sandbox.create();
+  sandbox = sinon.createSandbox();
 
   stubs = {
     post: sandbox.stub(httpbin, "post")
