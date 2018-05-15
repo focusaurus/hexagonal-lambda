@@ -9,6 +9,7 @@ module.exports = {
     path: `${__dirname}/.build`,
     libraryTarget: "commonjs2"
   },
+  mode: "production",
   target: "node"
 };
 

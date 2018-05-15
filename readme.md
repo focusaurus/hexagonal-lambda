@@ -4,19 +4,28 @@ This is an example application repository for implementing [hexagonal architectu
 
 It is intended to be a reference/example project implementation. While small, it is hopefully realistic and reasonably comprehensive. It takes into account development tooling, testing, deployment, security, developer documentation, and API documentation.
 
-## Setting up for development the first time
+## How to develop locally via docker (initial setup)
 
-- Install prerequisites
-  - node and npm
-    - See `.nvmrc` file for correct node version
-    - Using [https://github.com/creationix/nvm](nvm) recommended but optional
-  - zip
-  - pass: `brew install pass`
-  - AWS CLI:  `brew install awscli`
-    - **OR** `virtualenv python && ./python/bin/pip install awscli`
-- Clone the git repo if you haven't already and `cd` into the root directory
-- Run `npm install && npm run lint && npm test`
-- Set up your `local/env.sh` based on the template below. More details on configuration further down in this document.
+* Install [docker](https://docs.docker.com/install/)
+* Build the image
+  * `./docker/build-image.sh`
+* Get a shell for development in docker
+  * `/.docker/run.sh bash`
+* Now you're in the dev container and should have the prerequisite development tools with the correct versions available (node, terraform, AWS CLI etc)
+
+## How to develop locally without docker (initial setup)
+
+* Install prerequisites
+  * node and npm
+    * See `.nvmrc` file for correct node version
+    * Using [https://github.com/creationix/nvm](nvm) recommended but optional
+  * zip
+  * pass: `brew install pass`
+  * AWS CLI: `brew install awscli`
+    * **OR** `virtualenv python && ./python/bin/pip install awscli`
+* Clone the git repo if you haven't already and `cd` into the root directory
+* Run `npm install && npm run lint && npm test`
+* Set up your `local/env.sh` based on the template below. More details on configuration further down in this document.
 
 ```
 export AWS_DEFAULT_REGION='us-example-1'
@@ -25,74 +34,75 @@ export HL_DEPLOY='dev'
 export HL_HTTPBIN_URL='https://httpbin.org'
 export TF_VAR_httpbin_url="${HL_HTTPBIN_URL}"
 ```
-- To use that for terminal development we do `source ./local/env.sh`;
 
-- Set up pgp and a private key for working with `pass`
-  - There's some docs missing here on initially setting up a PGP key if you've never had one before and initializing your password store/repo. I'm currently pondering different alternatives for this so bear with me while I figure that out. Start with `gpg --full-generate-key`.
-- Set up the following shell alias (run in project root directory):
-  - `alias run-pass="${PWD}/bin/run-pass.sh"`
+* To use that for terminal development we do `source ./local/env.sh`;
+
+* Set up pgp and a private key for working with `pass`
+  * There's some docs missing here on initially setting up a PGP key if you've never had one before and initializing your password store/repo. I'm currently pondering different alternatives for this so bear with me while I figure that out. Start with `gpg --full-generate-key`.
+* Set up the following shell alias (run in project root directory):
+  * `alias run-pass="${PWD}/bin/run-pass.sh"`
 
 ## How to do typical development
 
-- Build lambdas: `npm run build`
-- Run lint: `npm run lint`
-- Run tests: `npm test`
-  - Run a single test file: `NODE_ENV=test tap code/get-hex/unit-tests-tap.js`
-  - Run some tests in a  file: `NODE_ENV=test tap --grep=example code/get-hex/unit-tests-tap.js`
-    - This will only run tests whose description includes "example"
-  - Run a few test files: `NODE_ENV=test tap code/get-hex/unit-tests-tap.js code/post-up/unit-tests-tap.js`
-  - debug a single test file: `NODE_ENV=test node --inspect-brk --inspect code/get-hex/unit-tests-tap.js`
-    - Or since debugging in node v6.10 which is what AWS lambda supports at the moment is buggy, you can debug in newer node:
-    - `NODE_ENV=test nvm exec v8.9.0 node --inspect --inspect-brk code/get-hex/unit-tests-tap.js`
-- Run a lambda locally: `node code/get-hex/run.js`
-  - Edit the sample event object in the code as needed before calling the lambda handler to simulate a specific case of interest
-- Run code coverage: `npm run coverage`
-- Preview terraform: `(cd terraform/dev && run-pass terraform plan)`
-- Provision for real: `(cd terraform/dev && run-pass terraform apply)`
-- Run smoke (integration/system) tests
-  - `export HL_API_URL=$(cd terraform/dev && run-pass terraform output api_url)`
-    - where "terraform/dev" is the desired deployment to test
-  - `npm run smoke` with the appropriate values for your deployment
-- Trigger an API Gateway deployment: `run-pass npm run deploy-apig dev`
-  - Substitute `demo` for `dev` to target that deployment
-  - Note our terraform-triggered deployments currently have an ordering issue where they fire before other APIG changes are done, so manually deploying is sometimes required.
-- Build OpenAPI JSON for documentation: `run-pass npm run openapi`
-  - Spits out JSON to stdout. Copy/paste to a swagger UI if you want a pretty site.
-  - `run-pass npm run openapi demo` if you want to set the demo deployment as the base URL
-- Update secrets
-  - for dev: `(cd secrets/dev && PASSWORD_STORE_DIR=. pass edit secrets.sh)`
-  - for demo same put replace dev with demo
-- Import
+These steps are the same with or without docker.
+
+* Build lambdas: `npm run build`
+* Run lint: `npm run lint`
+* Run tests: `npm test`
+  * Run a single test file: `NODE_ENV=test tap code/get-hex/unit-tests-tap.js`
+  * Run some tests in a file: `NODE_ENV=test tap --grep=example code/get-hex/unit-tests-tap.js`
+    * This will only run tests whose description includes "example"
+  * Run a few test files: `NODE_ENV=test tap code/get-hex/unit-tests-tap.js code/post-up/unit-tests-tap.js`
+  * debug a single test file: `NODE_ENV=test node --inspect-brk=0.0.0.0:9229 code/get-hex/unit-tests-tap.js`
+* Run a lambda locally: `node code/get-hex/run.js`
+  * Edit the sample event object in the code as needed before calling the lambda handler to simulate a specific case of interest
+* Run code coverage: `npm run coverage`
+* Preview terraform: `(cd terraform/dev && run-pass terraform plan)`
+* Provision for real: `(cd terraform/dev && run-pass terraform apply)`
+* Run smoke (integration/system) tests
+  * `export HL_API_URL=$(cd terraform/dev && run-pass terraform output api_url)`
+    * where "terraform/dev" is the desired deployment to test
+  * `npm run smoke` with the appropriate values for your deployment
+* Trigger an API Gateway deployment: `run-pass npm run deploy-apig dev`
+  * Substitute `demo` for `dev` to target that deployment
+  * Note our terraform-triggered deployments currently have an ordering issue where they fire before other APIG changes are done, so manually deploying is sometimes required.
+* Build OpenAPI JSON for documentation: `run-pass npm run openapi`
+  * Spits out JSON to stdout. Copy/paste to a swagger UI if you want a pretty site.
+  * `run-pass npm run openapi demo` if you want to set the demo deployment as the base URL
+* Update secrets
+  * for dev: `(cd secrets/dev && PASSWORD_STORE_DIR=. pass edit secrets.sh)`
+  * for demo same put replace dev with demo
+
 ## Filesystem Layout
 
 This project follows the same [underlying principles](https://github.com/focusaurus/express_code_structure#underlying-principles-and-motivations) I describe in my "Express Code Structure" sample project. Terraform doesn't play well with this as it requires grouping all `.tf` files in the same directory, so those are in a separate directory.
 
 **File Naming Conventions**
 
-- `lamba.js` AWS lambda handler modules
-- `*-tap.js` tap unit test files
-- `smoke-tests.js` smoke test files
-- `openapi.js` Open API documentation as an object
+* `lamba.js` AWS lambda handler modules
+* `*-tap.js` tap unit test files
+* `smoke-tests.js` smoke test files
+* `openapi.js` Open API documentation as an object
 
 ## Lambda Organization
 
-- Each lambda handler goes in its own directory under `code/name-of-lambda`
-  - This directory contains
-  - The lambda code itself goes in `lambda.js`
-    - The handler function is exported as `exports.handler`
-- I use the `mintsauce` middleware npm package to allow me to concisely mix and match reusable middlewares across all my lambdas
-  - The middleware pattern from express is proven effective, but it has drawbacks around implicit middleware interdependencies and run order
-  - Try not to over-rely on `call.local` shared state
-- All lambda code is easy to test and develop on
-  - Lambda tests are fully runnable offline
-  - Lambda handlers are fully runnable local talking to AWS/Internet services
-  - The whole test suite is fast to run
-  - It's easy to run a single test file
-  - It's easy to run a small group of test files
-  - It's easy to run some or all tests under the devtools debugger
-  - It's easy to run a lambda handler under the devtools debugger
-- Each lambda has a corresponding `-tap.js` file for the unit tests
-- Each lambda has a corresponding `terraform/*.tf` that defines the terraform configuration for that lambda function, and a corresponding API Gateway method as needed
+* Each lambda handler goes in its own directory under `code/name-of-lambda`
+  * This directory contains
+  * The lambda code itself goes in `lambda.js`
+    * The handler function is exported as `exports.handler`
+* I use the `mintsauce` middleware npm package to allow me to concisely mix and match reusable middlewares across all my lambdas
+  * The middleware pattern from express is proven effective, but it has drawbacks around implicit middleware interdependencies and run order
+  * Try not to over-rely on `call.local` shared state
+* All lambda code is easy to test and develop on
+  * Lambda tests are fully runnable offline
+  * Lambda handlers are fully runnable local talking to AWS/Internet services
+  * The whole test suite is fast to run
+  * It's easy to run a single test file
+  * It's easy to run a small group of test files
+  * It's easy to run some or all tests under the devtools debugger
+  * It's easy to run a lambda handler under the devtools debugger
+* Each lambda has a corresponding `-tap.js` file for the unit tests
+* Each lambda has a corresponding `terraform/*.tf` that defines the terraform configuration for that lambda function, and a corresponding API Gateway method as needed
 
 ## Input Validation
 
@@ -130,7 +140,7 @@ export AWS_PROFILE='example'
 export HL_AWS_ACCOUNT='1111111111'
 export HL_SECRET1='example-secret-1'
 
-export TF_VAR_aws_account="${HL_AWS_ACCOUNT}"
+export TF_VAR_hl_aws_account="${HL_AWS_ACCOUNT}"
 export TF_VAR_hl_secret1="${HL_SECRET1}"
 EOF
 ```
@@ -175,24 +185,25 @@ do
     --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
 done
 ```
+
 ## Smoke Tests
 
-My approach to end-to-end system testing I think is best described as "smoke testing" in that I run a small/minimal set of tests that ensure me the target environment is basically operational (not billowing out smoke). These smoke tests do not exhaustively test the application though.  I rely on my unit tests to thoroughly test the code's functionality. The smoke tests run quickly due to their very limited scope and are generally harmless and/or read-only operations.
+My approach to end-to-end system testing I think is best described as "smoke testing" in that I run a small/minimal set of tests that ensure me the target environment is basically operational (not billowing out smoke). These smoke tests do not exhaustively test the application though. I rely on my unit tests to thoroughly test the code's functionality. The smoke tests run quickly due to their very limited scope and are generally harmless and/or read-only operations.
 
-They can be run against different environments by setting the `API_URL` environment variable to the API Gateway URL including the path prefix corresponding to the deployment stage but no trailing slash.
+They can be run against different environments by setting the `HL_API_URL` environment variable to the API Gateway URL including the path prefix corresponding to the deployment stage but no trailing slash.
 
 ## Tooling
 
 For lambda builds at the moment I am using **webpack** and terraform for deployments. I haven't found a better way of managing depnedencies and getting small zip files. Webpack allows me to
 
-- Share 1 package.json file for all lambdas in the repo, which keeps things simple
-- Only bundle the production dependencies, no dev/test dependencies
-- Only bundle the specific dependencies of each individual lambda function. Because webpack walks the `require` dependency graph, each lambda gets only what it actually uses. (This is only to package granularity, no tree shaking to get even more precise than that)
-  - The `get-hex.zip` file is well under 1 MB, for example
-  - In theory the single-file bundling might even speed up the lambda cold startup time due to fewer filesystem reads, but that's just maybe a tiny side benefit
-- When I looked at serverless framework in Oct 2016 it was still pretty clunky and didn't seem to have a viable dependency management solution. That may have already been satisfactorily fixed or if not might be soon. I plan to re-evaluate serverless as it matures and adopt if/when it becomes useful.
-- I like the comprehensiveness that terraform can provision almost every resource I need, both the "serverless" ones and most other random AWS stuff as well.
-- I think learning/using terraform is more broadly useful/valuable vs just knowing serverless.
+* Share 1 package.json file for all lambdas in the repo, which keeps things simple
+* Only bundle the production dependencies, no dev/test dependencies
+* Only bundle the specific dependencies of each individual lambda function. Because webpack walks the `require` dependency graph, each lambda gets only what it actually uses. (This is only to package granularity, no tree shaking to get even more precise than that)
+  * The `get-hex.zip` file is well under 1 MB, for example
+  * In theory the single-file bundling might even speed up the lambda cold startup time due to fewer filesystem reads, but that's just maybe a tiny side benefit
+* When I looked at serverless framework in Oct 2016 it was still pretty clunky and didn't seem to have a viable dependency management solution. That may have already been satisfactorily fixed or if not might be soon. I plan to re-evaluate serverless as it matures and adopt if/when it becomes useful.
+* I like the comprehensiveness that terraform can provision almost every resource I need, both the "serverless" ones and most other random AWS stuff as well.
+* I think learning/using terraform is more broadly useful/valuable vs just knowing serverless.
 
 I use **eslint** for static analysis. Very valuable.
 
@@ -210,15 +221,15 @@ This exposes the AWS credentials to that one command only via environment variab
 
 I don't care so much about this particular set of npm dependencies, this particular testing stack, this code formatting style, etc. It's more about the substance:
 
-- We are confident the code is correct and robust
-  - Hitting a surprise bug after deployment is a rare event
-- We can simulate base/happy cases as well as edge/error cases in tests
-  - Otherwise there's no way to know what will happen that 1 time a year when that S3 HTTP GET fails
-- We can make changes effeciently and offline
-  - Rapid cycle of edit/test (near-zero delay)
-- We are protected against basic issues
-  - eslint config handles a lot of basic typos, etc
-  - near-100% code coverage means code was actually executed locally before being committed, pushed, or deployed
-- Developers can navigate the code easily
-  - Easy to find which file to edit
-  - Easy to edit all files necessary to make a typical change
+* We are confident the code is correct and robust
+  * Hitting a surprise bug after deployment is a rare event
+* We can simulate base/happy cases as well as edge/error cases in tests
+  * Otherwise there's no way to know what will happen that 1 time a year when that S3 HTTP GET fails
+* We can make changes effeciently and offline
+  * Rapid cycle of edit/test (near-zero delay)
+* We are protected against basic issues
+  * eslint config handles a lot of basic typos, etc
+  * near-100% code coverage means code was actually executed locally before being committed, pushed, or deployed
+* Developers can navigate the code easily
+  * Easy to find which file to edit
+  * Easy to edit all files necessary to make a typical change
