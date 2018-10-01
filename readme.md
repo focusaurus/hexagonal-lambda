@@ -8,10 +8,12 @@ It is intended to be a reference/example project implementation. While small, it
 
 * Install [docker](https://docs.docker.com/install/)
 * Build the image
-  * `./docker/build-image.sh`
+  * `./bin/docker-build.sh`
 * Get a shell for development in docker
-  * `/.docker/run.sh bash`
+  * `./bin/docker-run.sh`
 * Now you're in the dev container and should have the prerequisite development tools with the correct versions available (node, terraform, AWS CLI etc)
+* Install npm deps and run tests
+  * `npm install && npm test`
 
 ## How to develop locally without docker (initial setup)
 
