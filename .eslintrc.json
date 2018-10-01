@@ -28,6 +28,7 @@
       "safe"
     ],
     "import/no-extraneous-dependencies": "off",
+    "import/order": "off",
     "no-underscore-dangle": "off",
     "semi": "warn"
   }
