@@ -1,6 +1,6 @@
 # Hexagonal Lambda
 
-This is an example application repository for implementing [hexagonal architecture](http://alistair.cockburn.us/Hexagonal+architecture) as described by Alistair Cockburn (also called "ports and adapters") on top of Amazon Web Services Lambda.
+This is an example application repository for implementing [hexagonal architecture](https://web.archive.org/web/20180822100852/http://alistair.cockburn.us/Hexagonal+architecture) as described by Alistair Cockburn (also called "ports and adapters") on top of Amazon Web Services Lambda.
 
 It is intended to be a reference/example project implementation. While small, it is hopefully realistic and reasonably comprehensive. It takes into account development tooling, testing, deployment, security, developer documentation, and API documentation.
 
