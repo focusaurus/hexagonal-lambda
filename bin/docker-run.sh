@@ -14,10 +14,15 @@ IFS="$(printf "\n\t")"
 # ---- End unofficial bash strict mode boilerplate
 
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
-project="$(basename "${PWD}")"
+tag="$(basename "${PWD}")"
+
+if ! docker inspect "${tag}" &>/dev/null; then
+  ./bin/docker-build.sh
+fi
+
 exec docker run --rm --interactive --tty \
   --attach stdin --attach stdout --attach stderr \
   --volume "${PWD}:/opt" \
   --publish "127.0.0.1:9229:9229" \
   --user "${USER}" \
-  "${project}" "${1-bash}"
+  "${tag}" "${1-bash}"
